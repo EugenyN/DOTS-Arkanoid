@@ -1,0 +1,20 @@
+{
+    "Show": true,
+    "Dependencies": [
+        "GlobalObjectId_V1-1-ebcb4166b82b296469e08be0c6efab26-93214019566545601-0"
+    ],
+    "Components": [
+        {
+            "$type": "Unity.Build.Classic.ClassicBuildProfile, Unity.Build.Classic",
+            "$version": 1,
+            "Platform": "Android",
+            "Configuration": 3
+        },
+        {
+            "$type": "Unity.Build.Classic.ClassicScriptingSettings, Unity.Build.Classic",
+            "ScriptingBackend": 1,
+            "Il2CppCompilerConfiguration": 1,
+            "UseIncrementalGC": false
+        }
+    ]
+}
