@@ -4,7 +4,7 @@
 
 It's a clone of the classic arcade game created with the experimental Unity DOTS technologies. The game is based on the original Arkanoid gameplay. And the visual style refers to the games of the 16-bit era.
 
-The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows to write code in a date oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS (DOTS Physics and Hybrid Renderer). Some technical details are described below.
+The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows to write code in a data oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS (DOTS Physics and Hybrid Renderer). Some technical details are described below.
 
 ![scr1](/Images/1s.png) ![scr2](/Images/2s.png)
 ![scr3](/Images/3s.png) ![scr4](/Images/4s.png)
