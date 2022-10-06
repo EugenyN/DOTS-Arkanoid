@@ -1,6 +1,5 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 
-[GenerateAuthoringComponent]
 public struct LevelTag : IComponentData
 {
 }

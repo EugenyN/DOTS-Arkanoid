@@ -5,24 +5,23 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+//[UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 public partial class LaserTriggeringSystem : SystemBase
 {
-    private StepPhysicsWorld _stepPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
     
     protected override void OnCreate()
     {
-        _stepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireSingletonForUpdate<LaserShotTag>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
+        RequireForUpdate<LaserShotTag>();
     }
     
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        this.RegisterPhysicsRuntimeSystemReadOnly();
-    }
+    // protected override void OnStartRunning()
+    // {
+    //     base.OnStartRunning();
+    //     this.RegisterPhysicsRuntimeSystemReadOnly();
+    // }
 
     [BurstCompile]
     private struct LaserTriggeringJob : ICollisionEventsJob
@@ -30,7 +29,7 @@ public partial class LaserTriggeringSystem : SystemBase
         public EntityCommandBuffer Ecb;
         
         [ReadOnly]
-        public ComponentDataFromEntity<LaserShotTag> LaserShots;
+        public ComponentLookup<LaserShotTag> LaserShots;
 
         public void Execute(CollisionEvent collisionEvent)
         {
@@ -49,9 +48,9 @@ public partial class LaserTriggeringSystem : SystemBase
     {
         Dependency = new LaserTriggeringJob
         {
-            LaserShots = GetComponentDataFromEntity<LaserShotTag>(true),
+            LaserShots = GetComponentLookup<LaserShotTag>(true),
             Ecb = _endSimulationEcbSystem.CreateCommandBuffer()
-        }.Schedule(_stepPhysicsWorld.Simulation, Dependency);
+        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
         
         _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
     }

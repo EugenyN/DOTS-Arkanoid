@@ -7,7 +7,7 @@ public partial class GameWinSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        RequireSingletonForUpdate<GameWinState>();
+        RequireForUpdate<GameWinState>();
     }
     
     protected override void OnStartRunning()
@@ -46,7 +46,7 @@ public partial class GameWinSystem : SystemBase
     {
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = World.Time.DeltaTime;
         
         Entities.ForEach((Entity entity, ref GameData gameData, ref GameStateData gameStateData) =>
         {

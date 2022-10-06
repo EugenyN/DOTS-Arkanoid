@@ -10,7 +10,7 @@ public partial class PowerUpLossCheckSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
     
     protected override void OnUpdate()

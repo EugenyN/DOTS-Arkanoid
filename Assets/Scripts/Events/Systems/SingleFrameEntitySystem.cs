@@ -7,7 +7,7 @@ public partial class SingleFrameEntitySystem : SystemBase
 
     protected override void OnCreate()
     {
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         if (!HasSingleton<EventsHolderTag>())
         {
             var entity = EntityManager.CreateEntity(typeof(EventsHolderTag));

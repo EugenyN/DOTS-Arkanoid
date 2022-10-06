@@ -6,23 +6,22 @@ using Unity.Physics.Systems;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-[UpdateAfter(typeof(EndFramePhysicsSystem))]
+[UpdateAfter(typeof(PhysicsSystemGroup))]
 public partial class BallCollisionResolvingSystem : SystemBase
 {
-    private BuildPhysicsWorld _buildPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem _endFixedStepSimulationEcbSystem;
 
     protected override void OnCreate()
     {
-        _buildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
-        _endFixedStepSimulationEcbSystem = World.GetExistingSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
+        _endFixedStepSimulationEcbSystem = 
+            World.GetExistingSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
     }
 
     protected override unsafe void OnUpdate()
     {
         var ecb = _endFixedStepSimulationEcbSystem.CreateCommandBuffer();
 
-        var physicsWorld = _buildPhysicsWorld.PhysicsWorld;
+        var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
         var colliderCastHits = new NativeList<ColliderCastHit>(Allocator.TempJob);
         

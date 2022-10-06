@@ -1,6 +1,5 @@
 using Unity.Entities;
 
-[GenerateAuthoringComponent]
 public struct ScenePrefabs : IComponentData
 {
     public Entity BallEntityPrefab;

@@ -13,7 +13,7 @@ partial class GameSystem : SystemBase
         _gameDataQuery = EntityManager.CreateEntityQuery(ComponentType.ReadWrite<GameData>());
         _playersDataQuery = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerData>());
         
-        RequireSingletonForUpdate<GameSettings>();
+        RequireForUpdate<GameSettings>();
     }
 
     protected override void OnStartRunning()

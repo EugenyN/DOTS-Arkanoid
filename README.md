@@ -20,8 +20,8 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 
 ## Tech details
 
-* Pure ECS in runtime, except Audio, UI and resources, where [hybrid components](https://docs.unity3d.com/Packages/com.unity.entities@0.50/manual/hybrid_component.html) are used.
-* URP + [Hybrid render](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@latest/index.html) with shader for UV coord. animation. The Hybrid render uses Vulcan API only, so we can build the game on Android and Windows desktop platforms.
+* Pure ECS in runtime, except Audio, UI and resources, where [managed components](https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/components-managed.html) are used.
+* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@1.0/manual/index.html) with shader for UV coord. animation.
 * [DOTS Physics](https://docs.unity3d.com/Packages/com.unity.physics@latest/index.html) for triggers (ICollisionEventsJob), queries (CastCollider) and masks filtering
 * Burst compilation and jobs scheduling is used for most jobs, however, some sync points optimizations are possible.
 * You can use "F1" cheat button to spawn multiple balls.
@@ -29,7 +29,6 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Known issues
 
 * The current DOTS packages are experimental and may contain bugs. If you want to build a project using IL2CPP you must set Project settings -> Player -> Configuration section -> IL2CPP Code Generation -> Faster (smaller) builds, [otherwise the project will be built with an error](https://forum.unity.com/threads/executionengineexception-attempting-to-call-method-unity-entities-fastequality-compareimpl-1.1296462/).
-* If you get messages about material or shader errors, please re-import the assets.
 
 ## Links
 

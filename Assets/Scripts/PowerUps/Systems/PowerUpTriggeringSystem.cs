@@ -2,17 +2,14 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
-using Unity.Physics.Systems;
 
 public partial class PowerUpTriggeringSystem : SystemBase
 {
-    private StepPhysicsWorld _stepPhysicsWorld;
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
 
     protected override void OnCreate()
     {
-        _stepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
 
         RequireForUpdate(GetEntityQuery(typeof(PowerUpData)));
     }
@@ -23,9 +20,9 @@ public partial class PowerUpTriggeringSystem : SystemBase
         public EntityCommandBuffer Ecb;
         
         [ReadOnly]
-        public ComponentDataFromEntity<PowerUpData> PowerUps;
+        public ComponentLookup<PowerUpData> PowerUps;
         [ReadOnly]
-        public ComponentDataFromEntity<PaddleData> Paddles;
+        public ComponentLookup<PaddleData> Paddles;
         
         public void Execute(CollisionEvent collisionEvent)
         {
@@ -51,10 +48,10 @@ public partial class PowerUpTriggeringSystem : SystemBase
     {
         Dependency = new PowerUpTriggeringJob
         {
-            PowerUps = GetComponentDataFromEntity<PowerUpData>(true),
-            Paddles = GetComponentDataFromEntity<PaddleData>(true),
+            PowerUps = GetComponentLookup<PowerUpData>(true),
+            Paddles = GetComponentLookup<PaddleData>(true),
             Ecb = _endSimulationEcbSystem.CreateCommandBuffer()
-        }.Schedule(_stepPhysicsWorld.Simulation, Dependency);
+        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
         
         _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
     }

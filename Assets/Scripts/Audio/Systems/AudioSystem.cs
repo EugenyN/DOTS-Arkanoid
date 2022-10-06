@@ -9,6 +9,13 @@ public partial class AudioSystem : SystemBase
     private AudioSource _audioSource;
     private readonly Dictionary<AudioClipKeys, AudioClip> _clips = new Dictionary<AudioClipKeys, AudioClip>();
 
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        
+        RequireForUpdate<AudioSource>();
+    }
+
     protected override void OnStartRunning()
     {
         base.OnStartRunning();

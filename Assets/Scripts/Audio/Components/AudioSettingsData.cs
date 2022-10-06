@@ -23,7 +23,6 @@ public struct AudioClipEntry
     public AudioClip Clip;
 }
 
-[GenerateAuthoringComponent]
 public class AudioSettingsData : IComponentData
 {
     public AudioClipEntry[] Clips;

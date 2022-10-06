@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Entities;
 
 [Serializable]
@@ -11,7 +11,6 @@ public struct InputNames
     public string Action;
 }
 
-[GenerateAuthoringComponent]
 public class InputSettings : IComponentData
 {
     public InputNames[] InputNames;

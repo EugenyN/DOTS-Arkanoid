@@ -6,7 +6,7 @@ public partial class BallSpeedIncreaseSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        RequireSingletonForUpdate<BallHitEvent>();
+        RequireForUpdate<BallHitEvent>();
     }
     
     protected override void OnUpdate()

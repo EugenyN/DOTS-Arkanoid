@@ -29,8 +29,10 @@ public class GamePanelUI : MonoBehaviour
 
     private void OnEnable()
     {
-        _gameSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystem<GameSystem>();
-        _paddleInputPollSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystem<PaddleInputPollSystem>();
+        if (World.DefaultGameObjectInjectionWorld == null)
+            return;
+        _gameSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<GameSystem>();
+        _paddleInputPollSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<PaddleInputPollSystem>();
 
         _messageTime = null;
 

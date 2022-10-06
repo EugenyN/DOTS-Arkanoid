@@ -9,14 +9,14 @@ public partial class TextureAnimationSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        _beginSimulationEcbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
     {
         var ecb = _beginSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
 
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = World.Time.DeltaTime;
 
         Entities
             .WithNone<PlayTextureAnimation>()

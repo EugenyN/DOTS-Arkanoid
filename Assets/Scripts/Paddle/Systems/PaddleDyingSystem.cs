@@ -10,17 +10,17 @@ public partial class PaddleDyingSystem : SystemBase
     
     protected override void OnCreate()
     {
-        _endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
     
     protected override void OnUpdate()
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = World.Time.DeltaTime;
         
         Entities
-            .ForEach((Entity entity, ref PaddleDyingStateData dyingPaddle, ref MaterialColorData materialColor,
+            .ForEach((Entity paddle, ref PaddleDyingStateData dyingPaddle, ref MaterialColorData materialColor,
                 in OwnerPlayerId ownerPlayerId) =>
             {
                 if (dyingPaddle.StateTimer > 0)
@@ -35,9 +35,9 @@ public partial class PaddleDyingSystem : SystemBase
                 {
                     case PaddleDyingState.Dying:
                         
-                        ecb.RemoveComponent<PhysicsCollider>(entity);
-                        ecb.RemoveComponent<PaddleInputData>(entity);
-                        ecb.RemoveComponent<PlayTextureAnimation>(entity);
+                        ecb.RemoveComponent<PhysicsCollider>(paddle);
+                        ecb.RemoveComponent<PaddleInputData>(paddle);
+                        ecb.RemoveComponent<PlayTextureAnimation>(paddle);
                         
                         AudioSystem.PlayAudio(ecb, AudioClipKeys.BallLoss);
 
@@ -48,7 +48,7 @@ public partial class PaddleDyingSystem : SystemBase
                         break;
                     case PaddleDyingState.DyingComplete:
                         
-                        ecb.RemoveComponent<LocalToWorld>(entity); // hide entity
+                        ecb.RemoveComponent<LocalToWorld>(paddle); // hide entity
                         
                         dyingPaddle.State = PaddleDyingState.RespawnOrGameOver;
                         
@@ -62,7 +62,7 @@ public partial class PaddleDyingSystem : SystemBase
                         if (playerData.Lives != 0)
                             ecb.AddSingleFrameComponent(new PaddleSpawnRequest { OwnerPlayer = ownerPlayerId.Value });
 
-                        ecb.DestroyEntity(entity);
+                        ecb.DestroyEntity(paddle);
                         
                         break;
                     default:

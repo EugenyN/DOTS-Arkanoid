@@ -12,9 +12,9 @@ public partial class DisruptionPowerUpSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<PowerUpReceivedEvent>();
+        RequireForUpdate<PowerUpReceivedEvent>();
     }
     
     protected override void OnUpdate()
@@ -22,8 +22,8 @@ public partial class DisruptionPowerUpSystem : SystemBase
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
         var gameSettings = GetSingleton<GameSettings>();
-        var translationFromEntity = GetComponentDataFromEntity<Translation>(true);
-        var velocityFromEntity = GetComponentDataFromEntity<PhysicsVelocity>(true);
+        var translationFromEntity = GetComponentLookup<Translation>(true);
+        var velocityFromEntity = GetComponentLookup<PhysicsVelocity>(true);
         
         Entities
             .WithReadOnly(translationFromEntity)
@@ -41,8 +41,8 @@ public partial class DisruptionPowerUpSystem : SystemBase
     }
 
     private static void ActivatePowerUp(Entity paddle, Entity player, DynamicBuffer<BallLink> ballsBuffer,
-        EntityCommandBuffer ecb, GameSettings gameSettings, ComponentDataFromEntity<Translation> translationFromEntity,
-        ComponentDataFromEntity<PhysicsVelocity> velocityFromEntity)
+        EntityCommandBuffer ecb, GameSettings gameSettings, ComponentLookup<Translation> translationFromEntity,
+        ComponentLookup<PhysicsVelocity> velocityFromEntity)
     {
         var balls = ballsBuffer.Reinterpret<Entity>();
         if (balls.Length == 0)

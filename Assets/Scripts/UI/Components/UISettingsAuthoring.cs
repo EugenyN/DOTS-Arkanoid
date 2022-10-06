@@ -1,15 +1,17 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class UISettingsAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class UISettingsAuthoring : MonoBehaviour
 {
     [SerializeField] TitleUI _titleUI;
     [SerializeField] GamePanelUI _inGameUI;
-    
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+
+    private void Awake()
     {
-        dstManager.AddComponentObject(entity, _titleUI);
-        dstManager.AddComponentObject(entity, _inGameUI);
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        entityManager.AddComponentObject(entityManager.CreateEntity(), _titleUI);
+        entityManager.AddComponentObject(entityManager.CreateEntity(), _inGameUI);
     }
 }

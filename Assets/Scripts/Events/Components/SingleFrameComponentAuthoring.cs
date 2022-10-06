@@ -2,10 +2,13 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public class SingleFrameComponentAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class SingleFrameComponentAuthoring : MonoBehaviour
 {
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class Baker : Baker<SingleFrameComponentAuthoring>
     {
-        dstManager.AddBuffer<SingleFrameComponent>(entity);
+        public override void Bake(SingleFrameComponentAuthoring authoring)
+        {
+            AddBuffer<SingleFrameComponent>();
+        }
     }
 }

@@ -9,12 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83423c6821253f946aa2dd9db23584ed, type: 3}
-  m_Name: GlobalEntitySceneDependency
+  m_Script: {fileID: 11500000, guid: e2ea235c1fcfe29488ed97c467a0da53, type: 3}
+  m_Name: DotsClientSettings
   m_EditorClassIdentifier: 
-  cacheGUID:
-    Value:
-      x: 4146155189
-      y: 1288364920
-      z: 3890802586
-      w: 2997154771
+  FilterSettings:
+    ExcludedBakingSystemAssemblies: []

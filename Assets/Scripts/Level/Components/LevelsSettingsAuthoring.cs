@@ -1,24 +1,26 @@
+using System;
 using Unity.Entities;
 using UnityEngine;
 
-// use custom Authoring class to avoid RegisterBinding warning. May be fixed by Unity in future.
 [DisallowMultipleComponent]
-public class LevelsSettingsAuthoring : MonoBehaviour, IConvertGameObjectToEntity
+public class LevelsSettingsAuthoring : MonoBehaviour
 {
     public int BlocksInLine;
     public int BlocksLinesCount;
     public Texture2D[] LevelsData;
     public BlockColorCode[] BlocksPalette;
     
-    public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
+    public class Baker : Baker<LevelsSettingsAuthoring>
     {
-        var component = new LevelsSettings
+        public override void Bake(LevelsSettingsAuthoring authoring)
         {
-            BlocksInLine = BlocksInLine,
-            BlockLinesCount = BlocksLinesCount,
-            LevelsData = LevelsData,
-            BlocksPalette = BlocksPalette
-        };
-        dstManager.AddComponentData(entity, component);
+            AddComponentObject(new LevelsSettings
+            {
+                BlocksInLine = authoring.BlocksInLine,
+                BlockLinesCount = authoring.BlocksLinesCount,
+                LevelsData = authoring.LevelsData,
+                BlocksPalette = authoring.BlocksPalette
+            });
+        }
     }
 }

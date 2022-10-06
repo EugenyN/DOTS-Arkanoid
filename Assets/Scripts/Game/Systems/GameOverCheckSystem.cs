@@ -5,8 +5,8 @@ public partial class GameOverCheckSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        RequireSingletonForUpdate<GameProcessState>();
-        RequireSingletonForUpdate<PlayerData>();
+        RequireForUpdate<GameProcessState>();
+        RequireForUpdate<PlayerData>();
     }
 
     protected override void OnUpdate()

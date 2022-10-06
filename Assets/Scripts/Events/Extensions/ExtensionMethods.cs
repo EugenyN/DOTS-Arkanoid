@@ -3,7 +3,7 @@ using Unity.Entities;
 public static partial class ExtensionMethods
 {
     public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb, T component)
-        where T : struct, IComponentData
+        where T : unmanaged, IComponentData
     {
         var entity = ecb.CreateEntity();
         ecb.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
@@ -13,7 +13,7 @@ public static partial class ExtensionMethods
     }
     
     public static void AddSingleFrameComponent<T>(this EntityManager em, T component)
-        where T : struct, IComponentData
+        where T : unmanaged, IComponentData
     {
         var entity = em.CreateEntity();
         em.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
@@ -22,7 +22,7 @@ public static partial class ExtensionMethods
         em.AddComponent<SingleFrameEntityTag>(entity);
     }
     
-    public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb) where T : struct, IComponentData
+    public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb) where T : unmanaged, IComponentData
     {
         var entity = ecb.CreateEntity();
         ecb.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
@@ -32,14 +32,14 @@ public static partial class ExtensionMethods
     }
     
     public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb, Entity entity, T component)
-        where T : struct, IComponentData
+        where T : unmanaged, IComponentData
     {
         ecb.AddComponent(entity, component);
         ecb.AppendToBuffer(entity, new SingleFrameComponent { TargetComponent = ComponentType.ReadOnly<T>() });
     }
 
     public static void AddSingleFrameComponent<T>(this EntityManager em, Entity entity, T component)
-        where T : struct, IComponentData
+        where T : unmanaged, IComponentData
     {
         em.AddComponentData(entity, component);
         var buffer = em.GetBuffer<SingleFrameComponent>(entity);
@@ -47,7 +47,7 @@ public static partial class ExtensionMethods
     }
     
     public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb, Entity entity)
-        where T : struct, IComponentData
+        where T : unmanaged, IComponentData
     {
         ecb.AddComponent<T>(entity);
         ecb.AppendToBuffer(entity, new SingleFrameComponent { TargetComponent = ComponentType.ReadOnly<T>() });

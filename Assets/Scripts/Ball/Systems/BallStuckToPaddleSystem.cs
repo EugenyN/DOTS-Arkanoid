@@ -8,17 +8,17 @@ public partial class BallStuckToPaddleSystem : SystemBase
     
     protected override void OnCreate()
     {
-        _endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
 
-        RequireSingletonForUpdate<BallStuckToPaddle>();
-        RequireSingletonForUpdate<GameProcessState>();
+        RequireForUpdate<BallStuckToPaddle>();
+        RequireForUpdate<GameProcessState>();
     }
     
     protected override void OnUpdate()
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var deltaTime = Time.DeltaTime;
+        var deltaTime = World.Time.DeltaTime;
         
         Entities.ForEach((Entity entity, ref BallStuckToPaddle stuckData, in BallData data) =>
         {

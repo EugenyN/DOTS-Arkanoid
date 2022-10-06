@@ -11,7 +11,7 @@ public partial class PaddleAIInputSystem : SystemBase
             {
                 if (playerIndex.Value > 1)
                 {
-                    var state = (int) Time.ElapsedTime % (2 + playerIndex.Value);
+                    var state = (int) World.Time.ElapsedTime % (2 + playerIndex.Value);
                     inputData.Movement += state == 0 ? 1 : -1;
                 }
             }).Run();

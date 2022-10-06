@@ -18,9 +18,9 @@ public partial class PowerUpSpawnerSystem : SystemBase
         base.OnCreate();
         
         _powerUpsQuery = GetEntityQuery(typeof(PowerUpData));
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<HitByBallEvent>();
+        RequireForUpdate<HitByBallEvent>();
     }
 
     protected override void OnUpdate()

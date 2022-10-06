@@ -13,7 +13,7 @@ public partial class StickPaddleSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
     
     protected override void OnUpdate()

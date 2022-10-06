@@ -6,7 +6,7 @@ public partial class PaddleMovementSystem : SystemBase
 {
 	protected override void OnUpdate()
 	{
-		float deltaTime = Time.DeltaTime;
+		float deltaTime = World.Time.DeltaTime;
 		Entities.ForEach((ref Translation position, in PaddleInputData inputData, in PaddleData paddleData) =>
 		{
 			if (inputData.Movement != 0)

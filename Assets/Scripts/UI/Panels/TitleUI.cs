@@ -9,18 +9,25 @@ public class TitleUI : MonoBehaviour
     [SerializeField] GameObject _twoPlayerButton;
     
     private GameSystem _gameSystem;
-	
+
     private void OnEnable()
     {
-        _gameSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystem<GameSystem>();
+        if (World.DefaultGameObjectInjectionWorld == null)
+            return;
+        _gameSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<GameSystem>();
         
         EventSystem.current.SetSelectedGameObject(_onePlayerButton);
     }
 
     private void Update()
     {
+        if (World.DefaultGameObjectInjectionWorld == null)
+            return;
         var inputSettingsQuery = World.DefaultGameObjectInjectionWorld.EntityManager.CreateEntityQuery(
             ComponentType.ReadOnly<InputSettings>());
+        if (inputSettingsQuery.IsEmptyIgnoreFilter)
+            return;
+        
         var inputSettings = inputSettingsQuery.GetSingleton<InputSettings>();
         
         for (int i = 0; i < GameConst.MaxPlayers; i++)

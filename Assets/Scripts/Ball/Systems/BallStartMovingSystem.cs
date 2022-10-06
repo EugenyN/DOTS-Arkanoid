@@ -9,7 +9,9 @@ public partial class BallStartMovingSystem : SystemBase
 
     protected override void OnCreate()
     {
-        _endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        
+        RequireForUpdate<GameData>();
     }
 
     protected override void OnUpdate()

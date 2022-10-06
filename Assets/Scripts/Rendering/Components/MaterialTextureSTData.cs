@@ -2,7 +2,7 @@
  using Unity.Mathematics;
  using Unity.Rendering;
  
- [MaterialProperty("_BaseMap_ST", MaterialPropertyFormat.Float4)]
+ [MaterialProperty("_BaseMap_ST")]
  public struct MaterialTextureSTData : IComponentData
  {
      public float4 Value;

@@ -13,9 +13,9 @@ public partial class LaserSpawnerSystem : SystemBase
     {
         base.OnCreate();
         
-        _beginSimulationEcbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<LaserSpawnRequest>();
+        RequireForUpdate<LaserSpawnRequest>();
     }
     
     protected override void OnUpdate()

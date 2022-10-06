@@ -7,7 +7,7 @@ public partial class GameOverSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        RequireSingletonForUpdate<GameOverState>();
+        RequireForUpdate<GameOverState>();
     }
 
     protected override void OnStartRunning()
@@ -38,7 +38,7 @@ public partial class GameOverSystem : SystemBase
 
         if (gameState.StateTimer > 0)
         {
-            gameState.StateTimer -= Time.DeltaTime;
+            gameState.StateTimer -= World.Time.DeltaTime;
             SetSingleton(gameState);
         }
         else

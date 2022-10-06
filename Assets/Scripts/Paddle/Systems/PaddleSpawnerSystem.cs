@@ -11,9 +11,9 @@ public partial class PaddleSpawnerSystem : SystemBase
     {
         base.OnCreate();
         
-        _beginSimulationEcbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<PaddleSpawnRequest>();
+        RequireForUpdate<PaddleSpawnRequest>();
     }
     
     protected override void OnUpdate()

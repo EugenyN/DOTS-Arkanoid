@@ -1,7 +1,6 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Unity.Mathematics;
 
-[GenerateAuthoringComponent]
 public struct GameSettings : IComponentData
 {
     public int StartLevel;

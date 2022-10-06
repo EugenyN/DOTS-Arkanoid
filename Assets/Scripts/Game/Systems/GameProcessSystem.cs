@@ -7,7 +7,7 @@ public partial class GameProcessSystem : SystemBase
 	protected override void OnCreate()
 	{
 		base.OnCreate();
-		RequireSingletonForUpdate<GameProcessState>();
+		RequireForUpdate<GameProcessState>();
 	}
 	
 	protected override void OnStartRunning()

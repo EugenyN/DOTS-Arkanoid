@@ -11,7 +11,7 @@ public partial class BlocksSpawnerSystem : SystemBase
 
     private BeginSimulationEntityCommandBufferSystem _beginSimulationEcbSystem;
     
-    [BurstCompatible]
+    [GenerateTestsForBurstCompatibility]
     public struct BlocksSpawnJob : IJobParallelFor
     {
         public Entity BlockPrefab;
@@ -59,9 +59,9 @@ public partial class BlocksSpawnerSystem : SystemBase
     {
         base.OnCreate();
         
-        _beginSimulationEcbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<BlocksSpawnRequest>();
+        RequireForUpdate<BlocksSpawnRequest>();
     }
     
     protected override void OnUpdate()

@@ -13,7 +13,7 @@ public partial class GameWinCheckSystem : SystemBase
         });
         
         RequireForUpdate(GetEntityQuery(typeof(BallData)));
-        RequireSingletonForUpdate<GameProcessState>();
+        RequireForUpdate<GameProcessState>();
     }
 
     protected override void OnUpdate()

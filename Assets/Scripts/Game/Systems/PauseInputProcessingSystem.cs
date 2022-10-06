@@ -8,7 +8,7 @@ public partial class PauseInputProcessingSystem : SystemBase
 
     protected override void OnCreate()
     {
-        _gameSystem = World.GetExistingSystem<GameSystem>();
+        _gameSystem = World.GetExistingSystemManaged<GameSystem>();
     }
 
     protected override void OnUpdate()

@@ -12,9 +12,9 @@ public partial class BallSpawnerSystem : SystemBase
     {
         base.OnCreate();
         
-        _beginSimulationEcbSystem = World.GetExistingSystem<BeginSimulationEntityCommandBufferSystem>();
+        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<BallSpawnRequest>();
+        RequireForUpdate<BallSpawnRequest>();
     }
 
     protected override void OnUpdate()

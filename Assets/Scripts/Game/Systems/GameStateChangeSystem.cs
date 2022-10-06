@@ -9,10 +9,10 @@ public partial class GameStateChangeSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<GameStateData>();
-        RequireSingletonForUpdate<ChangeStateCommand>();
+        RequireForUpdate<GameStateData>();
+        RequireForUpdate<ChangeStateCommand>();
     }
 
     protected override void OnUpdate()

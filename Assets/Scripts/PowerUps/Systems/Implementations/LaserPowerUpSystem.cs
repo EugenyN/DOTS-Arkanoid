@@ -11,9 +11,9 @@ public partial class LaserPowerUpSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         
-        RequireSingletonForUpdate<PowerUpReceivedEvent>();
+        RequireForUpdate<PowerUpReceivedEvent>();
     }
     
     protected override void OnUpdate()

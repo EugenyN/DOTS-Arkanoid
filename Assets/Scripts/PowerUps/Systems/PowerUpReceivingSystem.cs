@@ -9,7 +9,7 @@ public partial class PowerUpReceivingSystem : SystemBase
     {
         base.OnCreate();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
         
         RequireForUpdate( GetEntityQuery(new EntityQueryDesc {
             All = new ComponentType[] { typeof(PowerUpReceivedEvent), typeof(PaddleData) }

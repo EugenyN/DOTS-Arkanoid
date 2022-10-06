@@ -10,7 +10,7 @@ public partial class LaserShotInputProcessingSystem : SystemBase
 
     protected override void OnCreate()
     {
-        _endSimulationEcbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()

@@ -6,7 +6,7 @@ public partial class SlowPowerUpSystem : SystemBase
     protected override void OnCreate()
     {
         base.OnCreate();
-        RequireSingletonForUpdate<PowerUpReceivedEvent>();
+        RequireForUpdate<PowerUpReceivedEvent>();
     }
     
     protected override void OnUpdate()
