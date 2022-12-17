@@ -29,7 +29,7 @@ public partial class PaddleDyingSystem : SystemBase
                     return;
                 }
 
-                var playerData = GetComponent<PlayerData>(ownerPlayerId.Value);
+                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
                 
                 switch (dyingPaddle.State)
                 {
@@ -57,7 +57,7 @@ public partial class PaddleDyingSystem : SystemBase
                         break;
                     case PaddleDyingState.RespawnOrGameOver:
                         playerData.Lives--;
-                        SetComponent(ownerPlayerId.Value, playerData);
+                        SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
                         
                         if (playerData.Lives != 0)
                             ecb.AddSingleFrameComponent(new PaddleSpawnRequest { OwnerPlayer = ownerPlayerId.Value });

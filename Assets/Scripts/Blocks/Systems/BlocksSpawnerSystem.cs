@@ -36,7 +36,7 @@ public partial class BlocksSpawnerSystem : SystemBase
             Ecb.SetName(index, block, "Block");
 
             var offset = new float3(0, BlocksLinesCount / 2.0f + 3, 0);
-            Ecb.AddComponent(index, block, new Translation { Value = BlockOffset + offset + position * BlockSize });
+            Ecb.AddComponent(index, block, LocalTransform.FromPosition(BlockOffset + offset + position * BlockSize));
             Ecb.AddComponent(index, block, new MaterialTextureSTData());
 
             int frameIndex = blockType switch {
@@ -66,15 +66,15 @@ public partial class BlocksSpawnerSystem : SystemBase
     
     protected override void OnUpdate()
     {
-        var levelsSettings = this.GetSingleton<LevelsSettings>();
+        var levelsSettings = SystemAPI.ManagedAPI.GetSingleton<LevelsSettings>();
         
-        var gameData = GetSingleton<GameData>();
+        var gameData = SystemAPI.GetSingleton<GameData>();
         int levelsCount = levelsSettings.LevelsData.Length;
         int levelDataIndex = (gameData.Level - 1) % levelsCount;
         
         var levelData = LevelsHelper.GetLevelData(levelsSettings, levelDataIndex);
 
-        var spawnRequest = GetSingleton<BlocksSpawnRequest>();
+        var spawnRequest = SystemAPI.GetSingleton<BlocksSpawnRequest>();
         
         var ecb = _beginSimulationEcbSystem.CreateCommandBuffer();
 

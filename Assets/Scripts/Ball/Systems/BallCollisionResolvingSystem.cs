@@ -30,14 +30,14 @@ public partial class BallCollisionResolvingSystem : SystemBase
             .WithReadOnly(physicsWorld)
             .WithDisposeOnCompletion(colliderCastHits)
             .ForEach(
-                (Entity entity, ref PhysicsVelocity velocity, in Translation position, in PhysicsCollider collider) =>
+                (Entity entity, ref PhysicsVelocity velocity, in LocalTransform transform, in PhysicsCollider collider) =>
                 {
                     colliderCastHits.Clear();
 
                     var colliderCastInput = new ColliderCastInput
                     {
-                        Collider = (Collider*)collider.Value.GetUnsafePtr(), Start = position.Value,
-                        End = position.Value
+                        Collider = (Collider*)collider.Value.GetUnsafePtr(), Start = transform.Position,
+                        End = transform.Position
                     };
                     
                     physicsWorld.CastCollider(colliderCastInput, ref colliderCastHits);
@@ -55,8 +55,8 @@ public partial class BallCollisionResolvingSystem : SystemBase
                             ecb.AddSingleFrameComponent(hit.Entity, new HitByBallEvent { Ball = entity });
                             ecb.AddSingleFrameComponent(entity, new BallHitEvent { HitEntity = hit.Entity });
                             
-                            var hitEntityPosition = GetComponent<Translation>(hit.Entity);
-                            var dist = math.distancesq(hitEntityPosition.Value, position.Value);
+                            var hitEntityTransform = SystemAPI.GetComponent<LocalTransform>(hit.Entity);
+                            var dist = math.distancesq(hitEntityTransform.Position, transform.Position);
                             if (dist < distToHitEntity)
                             {
                                 distToHitEntity = dist;
@@ -64,20 +64,20 @@ public partial class BallCollisionResolvingSystem : SystemBase
                             }
                         }
                         
-                        if (HasComponent<PaddleData>(closestHit.Entity))
+                        if (SystemAPI.HasComponent<PaddleData>(closestHit.Entity))
                         {
-                            var paddleData = GetComponent<PaddleData>(closestHit.Entity);
-                            var hitEntityPosition = GetComponent<Translation>(closestHit.Entity);
-                            ResolvePaddleCollision(ref velocity, position.Value, hitEntityPosition.Value,
+                            var paddleData = SystemAPI.GetComponent<PaddleData>(closestHit.Entity);
+                            var hitEntityTransform = SystemAPI.GetComponent<LocalTransform>(closestHit.Entity);
+                            ResolvePaddleCollision(ref velocity, transform.Position, hitEntityTransform.Position,
                                 paddleData.Size);
                         }
-                        else if (HasComponent<WallTag>(closestHit.Entity))
+                        else if (SystemAPI.HasComponent<WallTag>(closestHit.Entity))
                         {
                             ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
                         }
-                        else if (HasComponent<BlockData>(closestHit.Entity))
+                        else if (SystemAPI.HasComponent<BlockData>(closestHit.Entity))
                         {
-                            if (HasComponent<MegaBallTag>(entity) && !HasComponent<GoldBlock>(closestHit.Entity))
+                            if (SystemAPI.HasComponent<MegaBallTag>(entity) && !SystemAPI.HasComponent<GoldBlock>(closestHit.Entity))
                             {
                                 // ignore
                             }

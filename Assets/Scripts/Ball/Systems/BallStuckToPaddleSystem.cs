@@ -30,10 +30,10 @@ public partial class BallStuckToPaddleSystem : SystemBase
             }
             else
             {
-                var paddlePosition = GetComponent<Translation>(data.OwnerPaddle);
-                SetComponent(entity, new Translation {
-                    Value = paddlePosition.Value + new float3(stuckData.Offset, 1, 0)
-                });
+                var paddleTransform = SystemAPI.GetComponent<LocalTransform>(data.OwnerPaddle);
+                var position = LocalTransform.FromPosition(
+                    paddleTransform.Position + new float3(stuckData.Offset, 1, 0));
+                SystemAPI.SetComponent(entity, position);
             }
         }).Schedule();
         

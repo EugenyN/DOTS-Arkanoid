@@ -14,14 +14,14 @@ public partial class GameProcessSystem : SystemBase
     {
 	    var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
-	    var prefabs = GetSingleton<ScenePrefabs>();
+	    var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
 		
 	    ecb.Instantiate(prefabs.LevelEntityPrefab);
 	    
 	    var playerDataQuery = GetEntityQuery(typeof(PlayerData));
 	    if (playerDataQuery.IsEmpty)
 	    {
-		    var gameData = GetSingleton<GameData>();
+		    var gameData = SystemAPI.GetSingleton<GameData>();
 		    for (int i = 0; i < gameData.PlayersCount; i++)
 			    CreatePlayer(ecb, i);
 	    }
@@ -34,14 +34,14 @@ public partial class GameProcessSystem : SystemBase
 	    using var playerDataEntities = playerDataQuery.ToEntityArray(Allocator.Temp);
 	    foreach (var player in playerDataEntities)
 	    {
-		    var playerData = GetComponent<PlayerData>(player);
+		    var playerData = SystemAPI.GetComponent<PlayerData>(player);
 		    if (playerData.Lives != 0)
 			    ecb.AddSingleFrameComponent(new PaddleSpawnRequest { OwnerPlayer = player });
 	    }
 	    
 	    ecb.AddSingleFrameComponent(new BlocksSpawnRequest { BlockPrefab = prefabs.BlockEntityPrefab });
 	    
-	    var levelsSettings = this.GetSingleton<LevelsSettings>();
+	    var levelsSettings = SystemAPI.ManagedAPI.GetSingleton<LevelsSettings>();
 	    SetBallSpeedForLevel(levelsSettings);
 	    
 	    AudioSystem.PlayAudio(ecb, AudioClipKeys.RoundStart);
@@ -56,7 +56,7 @@ public partial class GameProcessSystem : SystemBase
 	
 	private Entity CreatePlayer(EntityCommandBuffer ecb, int playerIndex)
 	{
-		var gameSettings = GetSingleton<GameSettings>();
+		var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 		var entity = ecb.CreateEntity();
 		ecb.SetName(entity, "Player" + playerIndex);
 
@@ -69,13 +69,13 @@ public partial class GameProcessSystem : SystemBase
 	
 	private void SetBallSpeedForLevel(LevelsSettings levelsSettings)
 	{
-		var gameData = GetSingleton<GameData>();
-		var gameSettings = GetSingleton<GameSettings>();
+		var gameData = SystemAPI.GetSingleton<GameData>();
+		var gameSettings = SystemAPI.GetSingleton<GameSettings>();
         
 		int levelsCount = levelsSettings.LevelsData.Length;
 		int levelDifficulty = gameData.Level / (levelsCount + 1);
 		gameData.BallSpeed = gameSettings.BallSpeed + 1.2f * levelDifficulty;
         
-		SetSingleton(gameData);
+		SystemAPI.SetSingleton(gameData);
 	}
 }

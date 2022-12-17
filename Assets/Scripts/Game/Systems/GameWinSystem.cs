@@ -14,9 +14,9 @@ public partial class GameWinSystem : SystemBase
     {
         base.OnStartRunning();
         
-        var gameState = GetSingleton<GameStateData>();
+        var gameState = SystemAPI.GetSingleton<GameStateData>();
         gameState.StateTimer = 3.0f;
-        SetSingleton(gameState);
+        SystemAPI.SetSingleton(gameState);
         
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
 

@@ -12,9 +12,9 @@ public partial class BallProtectionCheatSystem : SystemBase
     {
         Entities
             .WithAny<BallData>()
-            .ForEach((Entity entity, ref PhysicsVelocity velocity, in Translation trans) =>
+            .ForEach((Entity entity, ref PhysicsVelocity velocity, in LocalTransform transform) =>
         {
-            if (trans.Value.y <= 1)
+            if (transform.Position.y <= 1)
                 velocity.Linear.y *= -1;
         }).Schedule();
     }

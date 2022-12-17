@@ -19,8 +19,8 @@ public partial class BallSpawnerSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var prefabs = GetSingleton<ScenePrefabs>();
-        var gameSettings = GetSingleton<GameSettings>();
+        var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         var ecb = _beginSimulationEcbSystem.CreateCommandBuffer();
 
@@ -32,7 +32,7 @@ public partial class BallSpawnerSystem : SystemBase
                 
                 ecb.AddComponent(ball, new BallData { OwnerPaddle = spawnRequest.OwnerPaddle });
                 ecb.AddComponent(ball, new OwnerPlayerId { Value = spawnRequest.OwnerPlayer });
-                ecb.SetComponent(ball, new Translation { Value = spawnRequest.Position });
+                ecb.SetComponent(ball, LocalTransform.FromPosition(spawnRequest.Position));
 
                 if (spawnRequest.StuckToPaddle)
                     ecb.AddComponent(ball, new BallStuckToPaddle { StuckTime = gameSettings.BallMovingDelay });
@@ -42,7 +42,7 @@ public partial class BallSpawnerSystem : SystemBase
                 ecb.AddComponent(ball, new MaterialColorData { Value = new float4( 1, 1, 1, 1) });
                 ecb.AddComponent(ball, new MaterialTextureSTData());
                 
-                var playerIndex = GetComponent<PlayerIndex>(spawnRequest.OwnerPlayer);
+                var playerIndex = SystemAPI.GetComponent<PlayerIndex>(spawnRequest.OwnerPlayer);
                 ecb.AddComponent(ball, new TextureAnimationData { FrameIndex = playerIndex.Value });
                 
                 ecb.AppendToBuffer(spawnRequest.OwnerPaddle, new BallLink { Ball = ball });

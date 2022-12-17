@@ -22,7 +22,7 @@ public partial class BlockHitSystem : SystemBase
         {
             if (blockData.Type != BlockTypes.Gold)
             {
-                if (HasComponent<MegaBallTag>(hitByBall.Ball))
+                if (SystemAPI.HasComponent<MegaBallTag>(hitByBall.Ball))
                     blockData.Health = 0;
                 else
                     blockData.Health--;
@@ -63,8 +63,8 @@ public partial class BlockHitSystem : SystemBase
                 }
                 else
                 {
-                    var playerEntity = GetComponent<OwnerPlayerId>(damagedByEntity[0]);
-                    var playerData = GetComponent<PlayerData>(playerEntity.Value);
+                    var playerEntity = SystemAPI.GetComponent<OwnerPlayerId>(damagedByEntity[0]);
+                    var playerData = SystemAPI.GetComponent<PlayerData>(playerEntity.Value);
                     playerData.Score += 50 + (int)blockData.Type * 10;
                     ecb.SetComponent(playerEntity.Value, playerData);
 

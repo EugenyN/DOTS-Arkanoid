@@ -20,13 +20,13 @@ public partial class LaserShotInputProcessingSystem : SystemBase
         Entities
             .WithAll<LaserPaddleTag>()
             .ForEach((Entity paddle, ref PaddleInputData inputData, in OwnerPlayerId ownerPlayerId,
-                in Translation position) =>
+                in LocalTransform transform) =>
             {
                 if (inputData.Action == InputActionType.Fire)
                 {
                     ecb.AddSingleFrameComponent(new LaserSpawnRequest
                     {
-                        Position = position.Value + new float3(0, 1, 0), OwnerPlayer = ownerPlayerId.Value
+                        Position = transform.Position + new float3(0, 1, 0), OwnerPlayer = ownerPlayerId.Value
                     });
                     AudioSystem.PlayAudio(ecb, AudioClipKeys.LaserShot);
                 }

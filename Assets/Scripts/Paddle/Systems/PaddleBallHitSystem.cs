@@ -21,11 +21,11 @@ public partial class PaddleBallHitSystem : SystemBase
         Entities
             .ForEach((Entity paddle, in HitByBallEvent hitByBall, in OwnerPlayerId ownerPlayerId) =>
             {
-                var playerData = GetComponent<PlayerData>(ownerPlayerId.Value);
+                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
                 playerData.Score += 10;
-                SetComponent(ownerPlayerId.Value, playerData);
+                SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
 
-                AudioSystem.PlayAudio(ecb, HasComponent<StickPaddleTag>(paddle) ? 
+                AudioSystem.PlayAudio(ecb, SystemAPI.HasComponent<StickPaddleTag>(paddle) ? 
                     AudioClipKeys.PaddleCatch : AudioClipKeys.PaddleHit);
             }).Schedule();
         

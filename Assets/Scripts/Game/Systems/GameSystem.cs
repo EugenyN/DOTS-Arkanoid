@@ -20,13 +20,13 @@ partial class GameSystem : SystemBase
     {
         base.OnStartRunning();
         
-        var gameSettings = GetSingleton<GameSettings>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         var gameData = EntityManager.CreateEntity(typeof(GameData), typeof(GameStateData));
         EntityManager.SetName(gameData, "GameData");
         
-        SetComponent(gameData, new GameData { Level = gameSettings.StartLevel, HighScore = gameSettings.HighScore });
-        SetComponent(gameData, new GameStateData { CurrentState = typeof(MainMenuState) });
+        SystemAPI.SetComponent(gameData, new GameData { Level = gameSettings.StartLevel, HighScore = gameSettings.HighScore });
+        SystemAPI.SetComponent(gameData, new GameStateData { CurrentState = typeof(MainMenuState) });
     }
 
     protected override void OnUpdate()

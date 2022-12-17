@@ -14,14 +14,14 @@ public partial class BallLossCheckSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        Entities.ForEach((Entity entity, in Translation trans, in BallData ballData) =>
+        Entities.ForEach((Entity entity, in LocalTransform transform, in BallData ballData) =>
         {
-            if (trans.Value.y <= 0)
+            if (transform.Position.y <= 0)
             {
                 ecb.AddSingleFrameComponent(ballData.OwnerPaddle, new BallLostEvent());
                 ecb.DestroyEntity(entity);
 
-                var ballsBuffer = GetBuffer<BallLink>(ballData.OwnerPaddle);
+                var ballsBuffer = SystemAPI.GetBuffer<BallLink>(ballData.OwnerPaddle);
                 for (int i = ballsBuffer.Length - 1; i >= 0; i--)
                 {
                     if (ballsBuffer[i].Ball == entity)

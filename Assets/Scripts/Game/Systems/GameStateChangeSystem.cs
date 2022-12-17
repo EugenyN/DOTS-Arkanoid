@@ -19,7 +19,7 @@ public partial class GameStateChangeSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
         
-        var command = GetSingleton<ChangeStateCommand>();
+        var command = SystemAPI.GetSingleton<ChangeStateCommand>();
         
         Entities
             .WithoutBurst()

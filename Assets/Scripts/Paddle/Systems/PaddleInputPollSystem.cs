@@ -16,7 +16,7 @@ public partial class PaddleInputPollSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        var inputSettings = this.GetSingleton<InputSettings>();
+        var inputSettings = SystemAPI.ManagedAPI.GetSingleton<InputSettings>();
         
         Entities
             .WithoutBurst()
@@ -57,12 +57,12 @@ public partial class PaddleInputPollSystem : SystemBase
         using var paddles = _paddlesQuery.ToEntityArray(Allocator.Temp);
         foreach (var paddle in paddles)
         {
-            var index = GetComponent<PlayerIndex>(paddle);
+            var index = SystemAPI.GetComponent<PlayerIndex>(paddle);
             if (index.Value == playerIndex)
             {
-                var inputData = GetComponent<PaddleInputData>(paddle);
+                var inputData = SystemAPI.GetComponent<PaddleInputData>(paddle);
                 inputData.Action = inputAction;
-                SetComponent(paddle, inputData);
+                SystemAPI.SetComponent(paddle, inputData);
             }
         }
     }

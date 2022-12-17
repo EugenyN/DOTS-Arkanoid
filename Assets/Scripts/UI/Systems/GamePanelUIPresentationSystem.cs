@@ -14,12 +14,15 @@ public partial class GamePanelUIPresentationSystem : SystemBase
         _gamePanelUIQuery = GetEntityQuery(typeof(GamePanelUI));
         
         RequireForUpdate<GamePanelUI>();
+        RequireForUpdate<GameData>();
     }
 
     protected override void OnUpdate()
     {
         if (_inGameUI == null)
             _inGameUI = EntityManager.GetComponentObject<GamePanelUI>(_gamePanelUIQuery.GetSingletonEntity());
+
+        var gameData = SystemAPI.GetSingleton<GameData>();
         
         Entities
             .WithoutBurst()
@@ -32,8 +35,7 @@ public partial class GamePanelUIPresentationSystem : SystemBase
                 else if (command.TargetState == typeof(GameProcessState))
                 {
                     _inGameUI.gameObject.SetActive(true);
-                        
-                    var gameData = GetSingleton<GameData>();
+                    
                     _inGameUI.SetPlayersCount(gameData.PlayersCount);
                     _inGameUI.SetLevel(gameData.Level);
                     _inGameUI.SetHighScore(gameData.HighScore);

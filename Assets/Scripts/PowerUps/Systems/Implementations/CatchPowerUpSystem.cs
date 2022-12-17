@@ -29,7 +29,7 @@ public partial class CatchPowerUpSystem : SystemBase
                     ecb.RemoveComponent<StickPaddleTag>(paddle);
                     
                     foreach (var ball in ballsBuffer.Reinterpret<Entity>()) {
-                        if (HasComponent<BallStuckToPaddle>(ball))
+                        if (SystemAPI.HasComponent<BallStuckToPaddle>(ball))
                             ecb.RemoveComponent<BallStuckToPaddle>(ball);
                     }
                 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -28,20 +27,20 @@ public partial class PowerUpSpawnerSystem : SystemBase
         if (!_powerUpsQuery.IsEmpty)
             return;
 
-        var gameSettings = GetSingleton<GameSettings>();
-        var prefabs = GetSingleton<ScenePrefabs>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
+        var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
         var powerUpsCount = Enum.GetValues(typeof(PowerUpType)).Length;
 
         var random = new Random((uint)Environment.TickCount);
         
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        Entities.WithAll<HitByBallEvent, BlockData>().ForEach((in Translation position) =>
+        Entities.WithAll<HitByBallEvent, BlockData>().ForEach((in LocalTransform transform) =>
         {
             if (random.NextFloat() < gameSettings.PowerUpProbability)
             {
                 var type = (PowerUpType)random.NextInt(powerUpsCount);
-                SpawnPowerUp(ecb, prefabs.PowerUpEntityPrefab, type, position);
+                SpawnPowerUp(ecb, prefabs.PowerUpEntityPrefab, type, transform);
             }
         }).Schedule();
         
@@ -49,12 +48,12 @@ public partial class PowerUpSpawnerSystem : SystemBase
     }
 
     private static void SpawnPowerUp(EntityCommandBuffer ecb, Entity prefab, PowerUpType powerUpType,
-        Translation position)
+        in LocalTransform transform)
     {
         var entity = ecb.Instantiate(prefab);
         ecb.SetName(entity, "PowerUp");
 
-        ecb.AddComponent(entity, position);
+        ecb.AddComponent(entity, transform);
         ecb.AddComponent(entity, new PowerUpData { Type = powerUpType });
         ecb.AddComponent(entity, new MaterialTextureSTData());
         ecb.AddComponent(entity, new TextureAnimationData());

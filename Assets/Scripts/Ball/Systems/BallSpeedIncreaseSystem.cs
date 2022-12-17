@@ -11,11 +11,11 @@ public partial class BallSpeedIncreaseSystem : SystemBase
     
     protected override void OnUpdate()
     {
-        var gameSettings = GetSingleton<GameSettings>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         Entities.ForEach((ref PhysicsVelocity velocity, in BallHitEvent hitEvent) =>
         {
-            if (HasComponent<PaddleData>(hitEvent.HitEntity))
+            if (SystemAPI.HasComponent<PaddleData>(hitEvent.HitEntity))
                 velocity.Linear *= gameSettings.BallSpeedIncreaseFactor;
         }).Schedule();
     }

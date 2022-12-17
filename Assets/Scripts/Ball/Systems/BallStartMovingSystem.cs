@@ -18,21 +18,21 @@ public partial class BallStartMovingSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var gameData = GetSingleton<GameData>();
+        var gameData = SystemAPI.GetSingleton<GameData>();
         var randomSeed = (uint)System.Environment.TickCount;
         
         Entities
             .WithAll<BallStartMovingTag, BallStuckToPaddle>()
-            .ForEach((Entity ball, in BallData ballData, in Translation position) =>
+            .ForEach((Entity ball, in BallData ballData, in LocalTransform transform) =>
             {
                 ecb.RemoveComponent<BallStuckToPaddle>(ball);
                 ecb.RemoveComponent<BallStartMovingTag>(ball);
 
-                var paddlePosition = GetComponent<Translation>(ballData.OwnerPaddle);
-                var paddleData = GetComponent<PaddleData>(ballData.OwnerPaddle);
+                var paddleTransform = SystemAPI.GetComponent<LocalTransform>(ballData.OwnerPaddle);
+                var paddleData = SystemAPI.GetComponent<PaddleData>(ballData.OwnerPaddle);
                 
                 var direction =
-                    BallsHelper.GetBounceDirection(position.Value, paddlePosition.Value, paddleData.Size);
+                    BallsHelper.GetBounceDirection(transform.Position, paddleTransform.Position, paddleData.Size);
 
                 if (direction.Equals(math.up()))
                     direction = BallsHelper.GetRandomDirection(new Random(randomSeed));

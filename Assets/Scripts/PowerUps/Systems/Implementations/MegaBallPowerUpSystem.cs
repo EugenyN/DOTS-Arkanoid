@@ -28,11 +28,11 @@ public partial class MegaBallPowerUpSystem : SystemBase
                 {
                     foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                     {
-                        if (HasComponent<MegaBallTag>(ball))
+                        if (SystemAPI.HasComponent<MegaBallTag>(ball))
                         {
-                            var materialColor = GetComponent<MaterialColorData>(ball);
+                            var materialColor = SystemAPI.GetComponent<MaterialColorData>(ball);
                             materialColor.Value = NormalBallColor;
-                            SetComponent(ball, materialColor);
+                            SystemAPI.SetComponent(ball, materialColor);
 
                             ecb.RemoveComponent<MegaBallTag>(ball);
                         }
@@ -43,9 +43,9 @@ public partial class MegaBallPowerUpSystem : SystemBase
                 {
                     foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                     {
-                        var materialColor = GetComponent<MaterialColorData>(ball);
+                        var materialColor = SystemAPI.GetComponent<MaterialColorData>(ball);
                         materialColor.Value = MegaBallColor;
-                        SetComponent(ball, materialColor);
+                        SystemAPI.SetComponent(ball, materialColor);
                         
                         ecb.AddComponent<MegaBallTag>(ball);
                         break;

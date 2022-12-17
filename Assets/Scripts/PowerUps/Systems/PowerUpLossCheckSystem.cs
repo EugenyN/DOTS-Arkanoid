@@ -17,9 +17,9 @@ public partial class PowerUpLossCheckSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        Entities.WithAll<PowerUpData>().ForEach((Entity entity, in Translation trans) =>
+        Entities.WithAll<PowerUpData>().ForEach((Entity entity, in LocalTransform transform) =>
         {
-            if (trans.Value.y <= 0)
+            if (transform.Position.y <= 0)
                 ecb.DestroyEntity(entity);
         }).Schedule();
         

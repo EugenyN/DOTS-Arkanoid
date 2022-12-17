@@ -11,7 +11,7 @@ public partial class SlowPowerUpSystem : SystemBase
     
     protected override void OnUpdate()
     {
-        var gameData = GetSingleton<GameData>();
+        var gameData = SystemAPI.GetSingleton<GameData>();
         
         Entities
             .ForEach((Entity paddle, in PowerUpReceivedEvent request, in DynamicBuffer<BallLink> ballsBuffer) =>
@@ -20,9 +20,9 @@ public partial class SlowPowerUpSystem : SystemBase
                 {
                     foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                     {
-                        var velocity = GetComponent<PhysicsVelocity>(ball);
+                        var velocity = SystemAPI.GetComponent<PhysicsVelocity>(ball);
                         velocity.Linear = MathUtils.ClampMagnitude(velocity.Linear, gameData.BallSpeed);
-                        SetComponent(ball, velocity);
+                        SystemAPI.SetComponent(ball, velocity);
                     }
                 }
             }).Schedule();

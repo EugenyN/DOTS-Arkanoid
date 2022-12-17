@@ -27,7 +27,7 @@ public partial class EnlargePowerUpSystem : SystemBase
     {
         base.OnStartRunning();
         
-        var gameSettings = GetSingleton<GameSettings>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         if (!_normalColliderBlobAssetRef.IsCreated)
         {
@@ -49,7 +49,7 @@ public partial class EnlargePowerUpSystem : SystemBase
 
         var hybridRendererSystem = World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
         
-        var materialsConfig = this.GetSingleton<PaddleMaterialsConfig>();
+        var materialsConfig = SystemAPI.ManagedAPI.GetSingleton<PaddleMaterialsConfig>();
         
         if (_normalPaddleMaterial == BatchMaterialID.Null)
             _normalPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.NormalPaddleMaterial);
@@ -71,7 +71,7 @@ public partial class EnlargePowerUpSystem : SystemBase
     
     protected override void OnUpdate()
     {
-        var gameSettings = GetSingleton<GameSettings>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         var normalColliderBlobAssetRef = _normalColliderBlobAssetRef;
         var bigColliderBlobAssetRef = _bigColliderBlobAssetRef;
@@ -80,7 +80,7 @@ public partial class EnlargePowerUpSystem : SystemBase
         var bigPaddleMaterial = _bigPaddleMaterial;
 
         Entities
-            .ForEach((Entity paddle, ref PaddleData paddleData, ref CompositeScale paddleScale,
+            .ForEach((Entity paddle, ref PaddleData paddleData, ref PostTransformScale paddleScale,
                 ref PhysicsCollider collider, ref MaterialMeshInfo mmi, in PowerUpReceivedEvent request) =>
             {
                 if (paddleData.ExclusivePowerUp == request.Type)
@@ -102,13 +102,13 @@ public partial class EnlargePowerUpSystem : SystemBase
             }).Run();
     }
 
-    private static void ResizeCollider(ref PaddleData paddleData, ref CompositeScale paddleScale, 
+    private static void ResizeCollider(ref PaddleData paddleData, ref PostTransformScale paddleScale, 
                                 ref PhysicsCollider collider, float3 size, BlobAssetReference<Collider> blobAssetReference)
     {
         Debug.Assert(!paddleData.Size.Equals(size));
         
         paddleData.Size = size;
-        paddleScale.Value = float4x4.Scale(size);
+        paddleScale.Value = float3x3.Scale(size);
         collider.Value = blobAssetReference;
     }
 }

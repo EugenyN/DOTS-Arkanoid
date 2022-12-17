@@ -20,17 +20,17 @@ public partial class PowerUpReceivingSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var gameSettings = GetSingleton<GameSettings>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
         
         Entities
             .ForEach((Entity paddle, ref PaddleData paddleData, in
                 PowerUpReceivedEvent powerUpReceivedEvent, in OwnerPlayerId ownerPlayerId) =>
             {
-                var playerData = GetComponent<PlayerData>(ownerPlayerId.Value);
+                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
                 playerData.Score += powerUpReceivedEvent.Type == PowerUpType.Break ?
                     gameSettings.BreakPowerUpScore : gameSettings.PowerUpScore;
                 
-                SetComponent(ownerPlayerId.Value, playerData);
+                SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
                 
                 if (PowerUpsHelper.IsExclusivePowerUp(powerUpReceivedEvent.Type))
                     paddleData.ExclusivePowerUp = powerUpReceivedEvent.Type;

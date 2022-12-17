@@ -6,7 +6,8 @@ using UnityEngine;
 [UpdateInGroup(typeof(PresentationSystemGroup))]
 public partial class AudioSystem : SystemBase
 {
-    private AudioSource _audioSource;
+    private Entity _audioSource;
+    
     private readonly Dictionary<AudioClipKeys, AudioClip> _clips = new Dictionary<AudioClipKeys, AudioClip>();
 
     protected override void OnCreate()
@@ -19,10 +20,10 @@ public partial class AudioSystem : SystemBase
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
-        _audioSource = EntityManager.GetComponentObject<AudioSource>(
-            GetEntityQuery(typeof(AudioSource)).GetSingletonEntity());
+        
+        _audioSource = GetEntityQuery(typeof(AudioSource)).GetSingletonEntity();
 
-        var audioSettings = this.GetSingleton<AudioSettingsData>();
+        var audioSettings = SystemAPI.ManagedAPI.GetSingleton<AudioSettingsData>();
         foreach (var clip in audioSettings.Clips)
             _clips.Add(clip.Key, clip.Clip);
     }
@@ -35,7 +36,8 @@ public partial class AudioSystem : SystemBase
             .WithoutBurst()
             .ForEach((Entity e, ref StopAudioSource stopAudioSource) =>
             {
-                _audioSource.Stop();
+                var audioSourceM = EntityManager.GetComponentObject<AudioSource>(_audioSource);
+                audioSourceM.Stop();
                 ecb.DestroyEntity(e);
             }).Run();
 
@@ -43,8 +45,9 @@ public partial class AudioSystem : SystemBase
             .WithoutBurst()
             .ForEach((Entity e, in StartAudioSource startAudioSource) =>
             {
-                _audioSource.clip = _clips[startAudioSource.Key];
-                _audioSource.Play();
+                var audioSourceM = EntityManager.GetComponentObject<AudioSource>(_audioSource);
+                audioSourceM.clip = _clips[startAudioSource.Key];
+                audioSourceM.Play();
                 ecb.DestroyEntity(e);
             }).Run();
 

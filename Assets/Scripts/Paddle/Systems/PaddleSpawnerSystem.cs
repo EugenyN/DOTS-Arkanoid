@@ -20,15 +20,15 @@ public partial class PaddleSpawnerSystem : SystemBase
     {
         var ecb = _beginSimulationEcbSystem.CreateCommandBuffer();
         
-        var gameSettings = GetSingleton<GameSettings>();
-        var gameData = GetSingleton<GameData>();
-        var prefabs = GetSingleton<ScenePrefabs>();
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
+        var gameData = SystemAPI.GetSingleton<GameData>();
+        var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
         
         var randomSeed = (uint)System.Environment.TickCount;
         
         Entities.ForEach((in PaddleSpawnRequest spawner) =>
         {
-            var playerIndex = GetComponent<PlayerIndex>(spawner.OwnerPlayer);
+            var playerIndex = SystemAPI.GetComponent<PlayerIndex>(spawner.OwnerPlayer);
             
             var paddle = ecb.Instantiate(prefabs.PaddleEntityPrefab);
             ecb.SetName(paddle, "Paddle");
@@ -37,7 +37,7 @@ public partial class PaddleSpawnerSystem : SystemBase
             var position = new float3((playerIndex.Value + 1) % 2 == 0 ? GameConst.GameAreaWidth - 6 : 6.0f, 
                 playerIndex.Value < 2 ? 1.0f : 2.0f, 0.0f);
             
-            ecb.AddComponent(paddle, new Translation { Value = position });
+            ecb.AddComponent(paddle, LocalTransform.FromPosition(position));
             ecb.AddComponent(paddle, new PaddleData { Size = gameSettings.PaddleSize, Speed = gameSettings.PaddleSpeed});
             ecb.AddComponent(paddle, new PaddleInputData());
             ecb.AddComponent(paddle, new OwnerPlayerId { Value = spawner.OwnerPlayer });

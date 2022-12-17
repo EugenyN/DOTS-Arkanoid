@@ -19,18 +19,18 @@ public partial class BallSpawnCheatInputProcessingSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var gameData = GetSingleton<GameData>();
+        var gameData = SystemAPI.GetSingleton<GameData>();
         var randomSeed = (uint)System.Environment.TickCount;
         
         Entities
             .WithNone<LaserPaddleTag>()
-            .ForEach((Entity paddle, ref PaddleInputData inputData, in Translation position, in OwnerPlayerId ownerPlayerId) =>
+            .ForEach((Entity paddle, ref PaddleInputData inputData, in LocalTransform transform, in OwnerPlayerId ownerPlayerId) =>
             {
                 if (inputData.Action == InputActionType.SpawnBallCheat)
                 {
                     ecb.AddSingleFrameComponent(new BallSpawnRequest
                     {
-                        Position = position.Value + new float3(0, 1, 0),
+                        Position = transform.Position + new float3(0, 1, 0),
                         OwnerPaddle = paddle,
                         OwnerPlayer = ownerPlayerId.Value,
                         StuckToPaddle = false,

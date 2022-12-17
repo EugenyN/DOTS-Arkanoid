@@ -21,19 +21,19 @@ public partial class DisruptionPowerUpSystem : SystemBase
     {
         var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
 
-        var gameSettings = GetSingleton<GameSettings>();
-        var translationFromEntity = GetComponentLookup<Translation>(true);
+        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
+        var transformFromEntity = GetComponentLookup<LocalTransform>(true);
         var velocityFromEntity = GetComponentLookup<PhysicsVelocity>(true);
         
         Entities
-            .WithReadOnly(translationFromEntity)
+            .WithReadOnly(transformFromEntity)
             .WithReadOnly(velocityFromEntity)
             .ForEach((Entity paddle, in PowerUpReceivedEvent request, in OwnerPlayerId ownerPlayerId,
                 in DynamicBuffer<BallLink> ballsBuffer) =>
             {
                 if (request.Type == PowerUpType.Disruption) {
                     ActivatePowerUp(paddle, ownerPlayerId.Value, ballsBuffer, ecb, gameSettings,
-                        translationFromEntity, velocityFromEntity);
+                        transformFromEntity, velocityFromEntity);
                 }
             }).Schedule();
         
@@ -41,7 +41,7 @@ public partial class DisruptionPowerUpSystem : SystemBase
     }
 
     private static void ActivatePowerUp(Entity paddle, Entity player, DynamicBuffer<BallLink> ballsBuffer,
-        EntityCommandBuffer ecb, GameSettings gameSettings, ComponentLookup<Translation> translationFromEntity,
+        EntityCommandBuffer ecb, GameSettings gameSettings, ComponentLookup<LocalTransform> transformFromEntity,
         ComponentLookup<PhysicsVelocity> velocityFromEntity)
     {
         var balls = ballsBuffer.Reinterpret<Entity>();
@@ -55,7 +55,7 @@ public partial class DisruptionPowerUpSystem : SystemBase
         {
             ecb.AddSingleFrameComponent(new BallSpawnRequest
             {
-                Position = translationFromEntity[ball].Value,
+                Position = transformFromEntity[ball].Position,
                 OwnerPaddle = paddle,
                 OwnerPlayer = player,
                 Velocity = math.mul(quaternion.RotateZ(-angle + i * angle * 2), velocityFromEntity[ball].Linear)

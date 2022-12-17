@@ -26,10 +26,6 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 * Burst compilation and jobs scheduling is used for most jobs, however, some sync points optimizations are possible.
 * You can use "F1" cheat button to spawn multiple balls.
 
-## Known issues
-
-* The current DOTS packages are experimental and may contain bugs. If you want to build a project using IL2CPP you must set Project settings -> Player -> Configuration section -> IL2CPP Code Generation -> Faster (smaller) builds, [otherwise the project will be built with an error](https://forum.unity.com/threads/executionengineexception-attempting-to-call-method-unity-entities-fastequality-compareimpl-1.1296462/).
-
 ## Links
 
 * [Getting started with Unity DOTS](https://nikolayk.medium.com/getting-started-with-unity-dots-part-1-ecs-7f963777db8e)

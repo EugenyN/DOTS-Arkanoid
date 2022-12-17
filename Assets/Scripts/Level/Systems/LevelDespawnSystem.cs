@@ -21,7 +21,7 @@ public partial class LevelDespawnSystem : SystemBase
     protected override void OnUpdate()
     {
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
-        ecb.DestroyEntitiesForEntityQuery(_despawnQuery);
+        ecb.DestroyEntity(_despawnQuery);
         ecb.Playback(EntityManager);
         ecb.Dispose();
     }
