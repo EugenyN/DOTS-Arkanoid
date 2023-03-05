@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Jobs;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class BlockHitSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

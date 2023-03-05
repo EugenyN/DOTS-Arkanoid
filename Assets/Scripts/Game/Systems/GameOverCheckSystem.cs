@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 public partial class GameOverCheckSystem : SystemBase
 {
     protected override void OnCreate()

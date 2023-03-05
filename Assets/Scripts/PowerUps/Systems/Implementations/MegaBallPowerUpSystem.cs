@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class MegaBallPowerUpSystem : SystemBase
 {
     private static readonly float4 MegaBallColor = new float4(0.0f, 1.0f, 0.0f, 1.0f);

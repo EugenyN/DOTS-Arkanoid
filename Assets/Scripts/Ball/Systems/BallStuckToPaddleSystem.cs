@@ -2,6 +2,7 @@
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class BallStuckToPaddleSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

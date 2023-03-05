@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup), OrderFirst = true)]
 public partial class BlocksSpawnerSystem : SystemBase
 {
     private static readonly float3 BlockOffset = new float3(2, -0.5f, 0);

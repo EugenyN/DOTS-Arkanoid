@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
-[UpdateBefore(typeof(BallSpawnerSystem))]
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class DisruptionPowerUpSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

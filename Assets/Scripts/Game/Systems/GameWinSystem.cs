@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Physics;
 
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 public partial class GameWinSystem : SystemBase
 {
     protected override void OnCreate()

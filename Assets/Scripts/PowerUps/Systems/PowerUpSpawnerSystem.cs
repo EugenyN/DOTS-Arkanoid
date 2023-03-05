@@ -5,6 +5,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using Random = Unity.Mathematics.Random;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class PowerUpSpawnerSystem : SystemBase
 {
     private EntityQuery _powerUpsQuery;

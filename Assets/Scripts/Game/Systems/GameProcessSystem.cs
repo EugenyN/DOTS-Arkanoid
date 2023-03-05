@@ -2,6 +2,7 @@
 using Unity.Collections;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 public partial class GameProcessSystem : SystemBase
 {
 	protected override void OnCreate()

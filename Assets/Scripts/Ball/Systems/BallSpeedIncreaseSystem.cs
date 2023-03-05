@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Physics;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class BallSpeedIncreaseSystem : SystemBase
 {
     protected override void OnCreate()

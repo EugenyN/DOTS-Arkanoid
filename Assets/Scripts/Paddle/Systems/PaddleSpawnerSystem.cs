@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class PaddleSpawnerSystem : SystemBase
 {
     private BeginSimulationEntityCommandBufferSystem _beginSimulationEcbSystem;

@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class PaddleDyingSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

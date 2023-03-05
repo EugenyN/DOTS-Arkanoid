@@ -3,6 +3,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 [UpdateAfter(typeof(PaddleSpawnerSystem))]
 public partial class BallSpawnerSystem : SystemBase
 {

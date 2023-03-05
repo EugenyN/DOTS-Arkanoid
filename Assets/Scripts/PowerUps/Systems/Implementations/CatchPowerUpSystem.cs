@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class CatchPowerUpSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

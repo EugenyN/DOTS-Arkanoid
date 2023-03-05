@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Physics;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class SlowPowerUpSystem : SystemBase
 {
     protected override void OnCreate()

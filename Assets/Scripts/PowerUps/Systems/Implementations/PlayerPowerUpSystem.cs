@@ -1,6 +1,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class PlayerPowerUpSystem : SystemBase
 {
     protected override void OnCreate()

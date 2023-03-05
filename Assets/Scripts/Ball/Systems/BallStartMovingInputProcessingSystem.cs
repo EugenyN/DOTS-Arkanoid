@@ -1,7 +1,6 @@
 ﻿using Unity.Entities;
 
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
-[UpdateAfter(typeof(PaddleInputPollSystem))]
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class BallStartMovingInputProcessingSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

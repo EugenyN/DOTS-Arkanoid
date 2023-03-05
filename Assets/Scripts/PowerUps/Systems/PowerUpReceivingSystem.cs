@@ -1,6 +1,7 @@
-﻿using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup), OrderLast = true)]
+[UpdateAfter(typeof(PowerUpTriggeringSystem))]
 public partial class PowerUpReceivingSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

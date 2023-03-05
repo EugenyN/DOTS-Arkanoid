@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 public partial class GameWinCheckSystem : SystemBase
 {
     private EntityQuery _blocksQuery;

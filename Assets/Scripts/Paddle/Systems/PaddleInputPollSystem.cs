@@ -3,7 +3,7 @@ using Unity.Entities;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
+[UpdateInGroup(typeof(GameInputSystemGroup))]
 public partial class PaddleInputPollSystem : SystemBase
 {
     private EntityQuery _paddlesQuery;

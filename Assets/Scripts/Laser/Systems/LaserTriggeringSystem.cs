@@ -5,7 +5,6 @@ using Unity.Physics;
 using Unity.Physics.Systems;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
-//[UpdateAfter(typeof(ExportPhysicsWorld)), UpdateBefore(typeof(EndFramePhysicsSystem))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
 public partial class LaserTriggeringSystem : SystemBase
 {
@@ -16,12 +15,6 @@ public partial class LaserTriggeringSystem : SystemBase
         _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
         RequireForUpdate<LaserShotTag>();
     }
-    
-    // protected override void OnStartRunning()
-    // {
-    //     base.OnStartRunning();
-    //     this.RegisterPhysicsRuntimeSystemReadOnly();
-    // }
 
     [BurstCompile]
     private struct LaserTriggeringJob : ICollisionEventsJob

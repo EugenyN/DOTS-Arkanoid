@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup), OrderFirst = true)]
 public partial class PowerUpTriggeringSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

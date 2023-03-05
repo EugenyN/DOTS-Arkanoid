@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class PowerUpLossCheckSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

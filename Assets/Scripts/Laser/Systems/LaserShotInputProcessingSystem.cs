@@ -2,8 +2,7 @@
 using Unity.Mathematics;
 using Unity.Transforms;
 
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
-[UpdateAfter(typeof(PaddleInputPollSystem))]
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class LaserShotInputProcessingSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

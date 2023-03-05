@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
+[UpdateInGroup(typeof(GameInputSystemGroup))]
 public partial class PaddleAIInputSystem : SystemBase
 {
     protected override void OnUpdate()

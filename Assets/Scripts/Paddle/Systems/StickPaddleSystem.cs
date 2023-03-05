@@ -3,6 +3,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class StickPaddleSystem : SystemBase
 {
     private const float StuckTimeLimit = 3.0f;

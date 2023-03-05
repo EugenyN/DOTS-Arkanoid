@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 public partial class GameOverSystem : SystemBase
 {
     protected override void OnCreate()

@@ -1,5 +1,6 @@
 using Unity.Entities;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class LaserPowerUpSystem : SystemBase
 {
     private const int NormalAnimationFrame = 4;

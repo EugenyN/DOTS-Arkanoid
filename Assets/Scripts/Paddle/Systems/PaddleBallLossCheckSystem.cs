@@ -1,6 +1,7 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
 
+[UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 public partial class PaddleBallLossCheckSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

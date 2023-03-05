@@ -2,6 +2,9 @@
 using Unity.Entities;
 using Unity.Rendering;
 
+[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
+[UpdateAfter(typeof(PowerUpsSystemGroup))]
+[UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
 public partial class LevelDespawnSystem : SystemBase
 {
     private EntityQuery _despawnQuery;

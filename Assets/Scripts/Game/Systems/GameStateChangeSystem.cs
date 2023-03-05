@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-[UpdateInGroup(typeof(SimulationSystemGroup), OrderLast = true)]
+[UpdateInGroup(typeof(GameStateSystemGroup), OrderLast = true)]
 public partial class GameStateChangeSystem : SystemBase
 {
     private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;

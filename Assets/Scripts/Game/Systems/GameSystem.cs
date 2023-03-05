@@ -1,6 +1,6 @@
 using Unity.Entities;
 
-[UpdateInGroup(typeof(InitializationSystemGroup))]
+[UpdateInGroup(typeof(GameStateSystemGroup))]
 partial class GameSystem : SystemBase
 {
     private EntityQuery _gameDataQuery;

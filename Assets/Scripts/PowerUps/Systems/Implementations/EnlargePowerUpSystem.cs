@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 using BoxCollider = Unity.Physics.BoxCollider;
 using Collider = Unity.Physics.Collider;
 
+[UpdateInGroup(typeof(PowerUpsSystemGroup))]
 public partial class EnlargePowerUpSystem : SystemBase
 {
     private BlobAssetReference<Collider> _normalColliderBlobAssetRef;
