@@ -23,7 +23,8 @@ public class GameSettingsAuthoring : MonoBehaviour
     {
         public override void Bake(GameSettingsAuthoring authoring)
         {
-            AddComponent(new GameSettings
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new GameSettings
             {
                 StartLevel = authoring.StartLevel,
                 HighScore = authoring.HighScore,

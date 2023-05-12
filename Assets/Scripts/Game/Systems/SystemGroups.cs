@@ -3,19 +3,19 @@
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateAfter(typeof(BeginSimulationEntityCommandBufferSystem))]
 [UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
-public class GameStateSystemGroup : ComponentSystemGroup {}
+public partial class GameStateSystemGroup : ComponentSystemGroup {}
 
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateAfter(typeof(GameStateSystemGroup))]
 [UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
-public class GameInputSystemGroup : ComponentSystemGroup {}
+public partial class GameInputSystemGroup : ComponentSystemGroup {}
 
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateAfter(typeof(FixedStepSimulationSystemGroup))]
 [UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
-public class BallBlockPaddleSystemGroup : ComponentSystemGroup {}
+public partial class BallBlockPaddleSystemGroup : ComponentSystemGroup {}
 
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateAfter(typeof(BallBlockPaddleSystemGroup))]
 [UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
-public class PowerUpsSystemGroup : ComponentSystemGroup {}
+public partial class PowerUpsSystemGroup : ComponentSystemGroup {}

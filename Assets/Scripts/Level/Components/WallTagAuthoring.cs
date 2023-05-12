@@ -7,7 +7,8 @@ public class WallTagAuthoring : MonoBehaviour
     {
         public override void Bake(WallTagAuthoring authoring)
         {
-            AddComponent(new WallTag());
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new WallTag());
         }
     }
 }

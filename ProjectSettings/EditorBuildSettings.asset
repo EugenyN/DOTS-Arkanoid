@@ -8,7 +8,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Arkanoid.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
-    path: Assets/Scenes/Arkanoid/Entities.unity
-    guid: 34092ce709668474bab93cc6a81afe8d
   m_configObjects: {}

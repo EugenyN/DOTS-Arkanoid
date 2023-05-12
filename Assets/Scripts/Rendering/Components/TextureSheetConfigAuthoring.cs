@@ -10,7 +10,8 @@ public class TextureSheetConfigAuthoring : MonoBehaviour
     {
         public override void Bake(TextureSheetConfigAuthoring authoring)
         {
-            AddComponent(new TextureSheetConfig
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new TextureSheetConfig
             {
                 FrameColumns = authoring.FrameColumns,
                 FrameRows = authoring.FrameRows

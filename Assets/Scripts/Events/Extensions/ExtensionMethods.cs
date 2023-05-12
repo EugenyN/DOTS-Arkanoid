@@ -1,6 +1,6 @@
 using Unity.Entities;
 
-public static partial class ExtensionMethods
+public static class ExtensionMethods
 {
     public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb, T component)
         where T : unmanaged, IComponentData

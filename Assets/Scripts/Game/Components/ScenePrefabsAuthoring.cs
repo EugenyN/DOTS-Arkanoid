@@ -14,14 +14,15 @@ public class ScenePrefabsAuthoring : MonoBehaviour
     {
         public override void Bake(ScenePrefabsAuthoring authoring)
         {
-            AddComponent(new ScenePrefabs
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponent(entity, new ScenePrefabs
             {
-                BallEntityPrefab = GetEntity(authoring.BallEntityPrefab),
-                BlockEntityPrefab = GetEntity(authoring.BlockEntityPrefab),
-                PaddleEntityPrefab = GetEntity(authoring.PaddleEntityPrefab),
-                PowerUpEntityPrefab = GetEntity(authoring.PowerUpEntityPrefab),
-                LevelEntityPrefab = GetEntity(authoring.LevelEntityPrefab),
-                LaserEntityPrefab = GetEntity(authoring.LaserEntityPrefab)
+                BallEntityPrefab = GetEntity(authoring.BallEntityPrefab, TransformUsageFlags.Dynamic),
+                BlockEntityPrefab = GetEntity(authoring.BlockEntityPrefab, TransformUsageFlags.Dynamic),
+                PaddleEntityPrefab = GetEntity(authoring.PaddleEntityPrefab, TransformUsageFlags.Dynamic),
+                PowerUpEntityPrefab = GetEntity(authoring.PowerUpEntityPrefab, TransformUsageFlags.Dynamic),
+                LevelEntityPrefab = GetEntity(authoring.LevelEntityPrefab, TransformUsageFlags.Dynamic),
+                LaserEntityPrefab = GetEntity(authoring.LaserEntityPrefab, TransformUsageFlags.Dynamic)
             });
         }
     }

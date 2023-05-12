@@ -14,7 +14,8 @@ public class LevelsSettingsAuthoring : MonoBehaviour
     {
         public override void Bake(LevelsSettingsAuthoring authoring)
         {
-            AddComponentObject(new LevelsSettings
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new LevelsSettings
             {
                 BlocksInLine = authoring.BlocksInLine,
                 BlockLinesCount = authoring.BlocksLinesCount,

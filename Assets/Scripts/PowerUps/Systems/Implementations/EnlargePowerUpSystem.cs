@@ -81,7 +81,7 @@ public partial class EnlargePowerUpSystem : SystemBase
         var bigPaddleMaterial = _bigPaddleMaterial;
 
         Entities
-            .ForEach((Entity paddle, ref PaddleData paddleData, ref PostTransformScale paddleScale,
+            .ForEach((Entity paddle, ref PaddleData paddleData, ref PostTransformMatrix paddleScale,
                 ref PhysicsCollider collider, ref MaterialMeshInfo mmi, in PowerUpReceivedEvent request) =>
             {
                 if (paddleData.ExclusivePowerUp == request.Type)
@@ -103,13 +103,13 @@ public partial class EnlargePowerUpSystem : SystemBase
             }).Run();
     }
 
-    private static void ResizeCollider(ref PaddleData paddleData, ref PostTransformScale paddleScale, 
+    private static void ResizeCollider(ref PaddleData paddleData, ref PostTransformMatrix paddleScale, 
                                 ref PhysicsCollider collider, float3 size, BlobAssetReference<Collider> blobAssetReference)
     {
         Debug.Assert(!paddleData.Size.Equals(size));
         
         paddleData.Size = size;
-        paddleScale.Value = float3x3.Scale(size);
+        paddleScale.Value = float4x4.Scale(size);
         collider.Value = blobAssetReference;
     }
 }

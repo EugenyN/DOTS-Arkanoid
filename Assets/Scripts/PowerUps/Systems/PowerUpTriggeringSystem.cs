@@ -16,7 +16,7 @@ public partial class PowerUpTriggeringSystem : SystemBase
     }
 
     [BurstCompile]
-    private struct PowerUpTriggeringJob : ICollisionEventsJob
+    private struct PowerUpTriggeringJob : ITriggerEventsJob
     {
         public EntityCommandBuffer Ecb;
         
@@ -25,10 +25,10 @@ public partial class PowerUpTriggeringSystem : SystemBase
         [ReadOnly]
         public ComponentLookup<PaddleData> Paddles;
         
-        public void Execute(CollisionEvent collisionEvent)
+        public void Execute(TriggerEvent triggerEvent)
         {
-            var entityA = collisionEvent.EntityA;
-            var entityB = collisionEvent.EntityB;
+            var entityA = triggerEvent.EntityA;
+            var entityB = triggerEvent.EntityB;
             
             var powerUpEntity = PowerUps.HasComponent(entityA) ? entityA : 
                 PowerUps.HasComponent(entityB) ? entityB : Entity.Null;

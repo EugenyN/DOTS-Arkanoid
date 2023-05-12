@@ -9,7 +9,8 @@ public class AudioSettingsDataAuthoring : MonoBehaviour
     {
         public override void Bake(AudioSettingsDataAuthoring authoring)
         {
-            AddComponentObject(new AudioSettingsData
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddComponentObject(entity, new AudioSettingsData
             {
                 Clips = authoring.Clips
             });       

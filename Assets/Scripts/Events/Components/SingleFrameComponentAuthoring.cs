@@ -8,7 +8,8 @@ public class SingleFrameComponentAuthoring : MonoBehaviour
     {
         public override void Bake(SingleFrameComponentAuthoring authoring)
         {
-            AddBuffer<SingleFrameComponent>();
+            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            AddBuffer<SingleFrameComponent>(entity);
         }
     }
 }

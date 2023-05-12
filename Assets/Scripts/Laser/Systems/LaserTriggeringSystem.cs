@@ -17,17 +17,17 @@ public partial class LaserTriggeringSystem : SystemBase
     }
 
     [BurstCompile]
-    private struct LaserTriggeringJob : ICollisionEventsJob
+    private struct LaserTriggeringJob : ITriggerEventsJob
     {
         public EntityCommandBuffer Ecb;
         
         [ReadOnly]
         public ComponentLookup<LaserShotTag> LaserShots;
 
-        public void Execute(CollisionEvent collisionEvent)
+        public void Execute(TriggerEvent triggerEvent)
         {
-            var entityA = collisionEvent.EntityA;
-            var entityB = collisionEvent.EntityB;
+            var entityA = triggerEvent.EntityA;
+            var entityB = triggerEvent.EntityB;
             
             if (LaserShots.HasComponent(entityA))
                 Ecb.AddSingleFrameComponent(entityB, new HitByLaserEvent { LaserShot = entityA });

@@ -8,7 +8,7 @@ public partial class AudioSystem : SystemBase
 {
     private Entity _audioSource;
     
-    private readonly Dictionary<AudioClipKeys, AudioClip> _clips = new Dictionary<AudioClipKeys, AudioClip>();
+    private readonly Dictionary<AudioClipKeys, AudioClip> _clips = new();
 
     protected override void OnCreate()
     {

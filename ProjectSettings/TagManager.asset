@@ -11,12 +11,12 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ball
+  - Paddle
+  - Block
+  - PowerUp
+  - Wall
+  - Laser
   - 
   - 
   - 
