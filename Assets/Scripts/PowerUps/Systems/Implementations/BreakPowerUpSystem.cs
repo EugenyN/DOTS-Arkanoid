@@ -1,34 +1,37 @@
+using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class BreakPowerUpSystem : SystemBase
+public partial struct BreakPowerUpSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((in PowerUpReceivedEvent request) =>
+        new BreakPowerUpJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct BreakPowerUpJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        
+        private void Execute(in PowerUpReceivedEvent request)
+        {
+            if (request.Type == PowerUpType.Break)
             {
-                if (request.Type == PowerUpType.Break)
-                {
-                    ecb.AddSingleFrameComponent(new ChangeStateCommand {
-                        TargetState = ComponentType.ReadWrite<GameWinState>()
-                    });
-                }
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                Ecb.AddSingleFrameComponent(ChangeStateCommand.Create<GameWinState>());
+            }
+        }
     }
 }

@@ -1,29 +1,43 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class PlayerPowerUpSystem : SystemBase
+public partial struct PlayerPowerUpSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<GameSettings>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
         
-        Entities
-            .ForEach((in PowerUpReceivedEvent request, in OwnerPlayerId ownerPlayerId) =>
+        new LaserPowerUpJob
+        {
+            PlayerDataLookup = SystemAPI.GetComponentLookup<PlayerData>(),
+            PlayerMaxLives = gameSettings.PlayerMaxLives
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct LaserPowerUpJob : IJobEntity
+    {
+        public ComponentLookup<PlayerData> PlayerDataLookup;
+        public int PlayerMaxLives;
+        
+        private void Execute(in PowerUpReceivedEvent request, in OwnerPlayerId ownerPlayerId)
+        {
+            if (request.Type == PowerUpType.Player)
             {
-                if (request.Type == PowerUpType.Player)
-                {
-                    var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
-                    playerData.Lives++;
-                    playerData.Lives = math.min(playerData.Lives, gameSettings.PlayerMaxLives);
-                    SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
-                }
-            }).Schedule();
+                var playerData = PlayerDataLookup[ownerPlayerId.Value];
+                playerData.Lives++;
+                playerData.Lives = math.min(playerData.Lives, PlayerMaxLives);
+                PlayerDataLookup[ownerPlayerId.Value] = playerData;
+            }
+        }
     }
 }

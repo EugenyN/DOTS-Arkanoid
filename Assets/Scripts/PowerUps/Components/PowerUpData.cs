@@ -11,6 +11,7 @@ public enum PowerUpType
     Player,
     Slow,
     /*Twin*/
+    PowerUpsCount
 }
 
 public struct PowerUpData : IComponentData

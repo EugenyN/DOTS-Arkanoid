@@ -1,50 +1,55 @@
+using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class LaserPowerUpSystem : SystemBase
+public partial struct LaserPowerUpSystem : ISystem
 {
     private const int NormalAnimationFrame = 4;
     private const int LaserAnimationFrame = 16;
     
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((Entity paddle, ref PlayTextureAnimation playTextureAnimation,
-                in PaddleData paddleData, in PowerUpReceivedEvent request, in PlayerIndex playerIndex) =>
+        new LaserPowerUpJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct LaserPowerUpJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        
+        private void Execute(Entity paddle, ref PlayTextureAnimation playTextureAnimation,
+            in PaddleData paddleData, in PowerUpReceivedEvent request, in PlayerIndex playerIndex)
+        {
+            if (paddleData.ExclusivePowerUp == request.Type)
+                return;
+
+            if (paddleData.ExclusivePowerUp == PowerUpType.Laser && PowerUpsHelper.IsExclusivePowerUp(request.Type))
             {
-                if (paddleData.ExclusivePowerUp == request.Type)
-                    return;
-
-                if (paddleData.ExclusivePowerUp == PowerUpType.Laser && PowerUpsHelper.IsExclusivePowerUp(request.Type))
-                {
-                    ecb.RemoveComponent<LaserPaddleTag>(paddle);
+                Ecb.RemoveComponent<LaserPaddleTag>(paddle);
                     
-                    playTextureAnimation.StartFrame = NormalAnimationFrame * playerIndex.Value;
-                    playTextureAnimation.Initialized = false;
-                }
+                playTextureAnimation.StartFrame = NormalAnimationFrame * playerIndex.Value;
+                playTextureAnimation.Initialized = false;
+            }
 
-                if (request.Type == PowerUpType.Laser)
-                {
-                    ecb.AddComponent(paddle, new LaserPaddleTag());
+            if (request.Type == PowerUpType.Laser)
+            {
+                Ecb.AddComponent(paddle, new LaserPaddleTag());
                     
-                    playTextureAnimation.StartFrame = LaserAnimationFrame;
-                    playTextureAnimation.Initialized = false;
-                }
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                playTextureAnimation.StartFrame = LaserAnimationFrame;
+                playTextureAnimation.Initialized = false;
+            }
+        }
     }
 }

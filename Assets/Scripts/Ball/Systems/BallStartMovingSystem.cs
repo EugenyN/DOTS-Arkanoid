@@ -1,51 +1,67 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class BallStartMovingSystem : SystemBase
+public partial struct BallStartMovingSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<GameData>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<GameData>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
         var gameData = SystemAPI.GetSingleton<GameData>();
-        var randomSeed = (uint)System.Environment.TickCount;
+
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .WithAll<BallStartMovingTag, BallStuckToPaddle>()
-            .ForEach((Entity ball, in BallData ballData, in LocalTransform transform) =>
-            {
-                ecb.RemoveComponent<BallStuckToPaddle>(ball);
-                ecb.RemoveComponent<BallStartMovingTag>(ball);
+        new BallStartMovingJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            PaddleDataLookup = SystemAPI.GetComponentLookup<PaddleData>(true),
+            Random = Random.CreateFromIndex(state.GlobalSystemVersion),
+            BallSpeed = gameData.BallSpeed
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    [WithAll(typeof(BallStartMovingTag), typeof(BallStuckToPaddle))]
+    public partial struct BallStartMovingJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
+        [ReadOnly] public ComponentLookup<PaddleData> PaddleDataLookup;
+        public Random Random;
+        public float BallSpeed;
+        
+        private void Execute(Entity ball, in BallData ballData, in LocalTransform transform)
+        {
+            Ecb.RemoveComponent<BallStuckToPaddle>(ball);
+            Ecb.RemoveComponent<BallStartMovingTag>(ball);
 
-                var paddleTransform = SystemAPI.GetComponent<LocalTransform>(ballData.OwnerPaddle);
-                var paddleData = SystemAPI.GetComponent<PaddleData>(ballData.OwnerPaddle);
+            var paddleTransform = LocalTransformLookup[ballData.OwnerPaddle];
+            var paddleData = PaddleDataLookup[ballData.OwnerPaddle];
                 
-                var direction =
-                    BallsHelper.GetBounceDirection(transform.Position, paddleTransform.Position, paddleData.Size);
+            var direction =
+                BallsHelper.GetBounceDirection(transform.Position, paddleTransform.Position, paddleData.Size);
 
-                if (direction.Equals(math.up()))
-                    direction = BallsHelper.GetRandomDirection(new Random(randomSeed));
+            if (direction.Equals(math.up()))
+                direction = BallsHelper.GetRandomDirection(Random);
 
-                ecb.AddComponent(ball, new PhysicsVelocity
-                {
-                    Linear = direction * gameData.BallSpeed, Angular = float3.zero
-                });
+            Ecb.AddComponent(ball, new PhysicsVelocity
+            {
+                Linear = direction * BallSpeed, Angular = float3.zero
+            });
 
-                AudioSystem.PlayAudio(ecb, AudioClipKeys.PaddleHit);
-            }).Schedule();
-
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            AudioSystem.PlayAudio(Ecb, AudioClipKeys.PaddleHit);
+        }
     }
 }

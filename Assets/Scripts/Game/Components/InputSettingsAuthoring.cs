@@ -10,7 +10,7 @@ public class InputSettingsAuthoring : MonoBehaviour
     {
         public override void Bake(InputSettingsAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponentObject(entity, new InputSettings
             {
                 InputNames = authoring.InputNames

@@ -6,45 +6,47 @@ using Unity.Physics.Systems;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-public partial class LaserTriggeringSystem : SystemBase
+public partial struct LaserTriggeringSystem : ISystem
 {
-    private EndFixedStepSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
-        RequireForUpdate<LaserShotTag>();
+        state.RequireForUpdate<SimulationSingleton>();
+        state.RequireForUpdate<LaserShotTag>();
     }
-
+    
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        state.Dependency = new LaserTriggeringJob
+        {
+            LaserShots = SystemAPI.GetComponentLookup<LaserShotTag>(true),
+            HitByLaserEventLookup = SystemAPI.GetComponentLookup<HitByLaserEvent>(),
+        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
+    }
+    
     [BurstCompile]
     private struct LaserTriggeringJob : ITriggerEventsJob
     {
-        public EntityCommandBuffer Ecb;
-        
-        [ReadOnly]
-        public ComponentLookup<LaserShotTag> LaserShots;
+        [ReadOnly] public ComponentLookup<LaserShotTag> LaserShots;
+        public ComponentLookup<HitByLaserEvent> HitByLaserEventLookup;
 
         public void Execute(TriggerEvent triggerEvent)
         {
             var entityA = triggerEvent.EntityA;
             var entityB = triggerEvent.EntityB;
-            
-            if (LaserShots.HasComponent(entityA))
-                Ecb.AddSingleFrameComponent(entityB, new HitByLaserEvent { LaserShot = entityA });
-            
-            if (LaserShots.HasComponent(entityB))
-                Ecb.AddSingleFrameComponent(entityA, new HitByLaserEvent { LaserShot = entityB });
-        }
-    }
 
-    protected override void OnUpdate()
-    {
-        Dependency = new LaserTriggeringJob
-        {
-            LaserShots = GetComponentLookup<LaserShotTag>(true),
-            Ecb = _endSimulationEcbSystem.CreateCommandBuffer()
-        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            if (LaserShots.HasComponent(entityA))
+            {
+                HitByLaserEventLookup[entityB] = new HitByLaserEvent { LaserShot = entityA };
+                HitByLaserEventLookup.SetComponentEnabled(entityB, true);
+            }
+
+            if (LaserShots.HasComponent(entityB))
+            {
+                HitByLaserEventLookup[entityA] = new HitByLaserEvent { LaserShot = entityB };
+                HitByLaserEventLookup.SetComponentEnabled(entityA, true);
+            }
+        }
     }
 }

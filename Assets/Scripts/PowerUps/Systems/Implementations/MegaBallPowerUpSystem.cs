@@ -1,59 +1,69 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class MegaBallPowerUpSystem : SystemBase
+public partial struct MegaBallPowerUpSystem : ISystem
 {
     private static readonly float4 MegaBallColor = new float4(0.0f, 1.0f, 0.0f, 1.0f);
     private static readonly float4 NormalBallColor = new float4(1.0f, 1.0f, 1.0f, 1.0f);
-
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
     
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((Entity paddle, in PowerUpReceivedEvent request, in DynamicBuffer<BallLink> ballsBuffer) =>
+        new MegaBallPowerUpJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            MegaBallTagLookup = SystemAPI.GetComponentLookup<MegaBallTag>(true),
+            MaterialColorDataLookup = SystemAPI.GetComponentLookup<MaterialColorData>()
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct MegaBallPowerUpJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        [ReadOnly] public ComponentLookup<MegaBallTag> MegaBallTagLookup;
+        public ComponentLookup<MaterialColorData> MaterialColorDataLookup;
+        
+        private void Execute(in PowerUpReceivedEvent request, in DynamicBuffer<BallLink> ballsBuffer)
+        {
+            if (request.Type == PowerUpType.Disruption)
             {
-                if (request.Type == PowerUpType.Disruption)
+                foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                 {
-                    foreach (var ball in ballsBuffer.Reinterpret<Entity>())
+                    if (MegaBallTagLookup.HasComponent(ball))
                     {
-                        if (SystemAPI.HasComponent<MegaBallTag>(ball))
-                        {
-                            var materialColor = SystemAPI.GetComponent<MaterialColorData>(ball);
-                            materialColor.Value = NormalBallColor;
-                            SystemAPI.SetComponent(ball, materialColor);
+                        var materialColor = MaterialColorDataLookup[ball];
+                        materialColor.Value = NormalBallColor;
+                        MaterialColorDataLookup[ball] = materialColor;
 
-                            ecb.RemoveComponent<MegaBallTag>(ball);
-                        }
+                        Ecb.RemoveComponent<MegaBallTag>(ball);
                     }
                 }
+            }
                     
-                if (request.Type == PowerUpType.MegaBall)
+            if (request.Type == PowerUpType.MegaBall)
+            {
+                foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                 {
-                    foreach (var ball in ballsBuffer.Reinterpret<Entity>())
-                    {
-                        var materialColor = SystemAPI.GetComponent<MaterialColorData>(ball);
-                        materialColor.Value = MegaBallColor;
-                        SystemAPI.SetComponent(ball, materialColor);
+                    var materialColor = MaterialColorDataLookup[ball];
+                    materialColor.Value = MegaBallColor;
+                    MaterialColorDataLookup[ball] = materialColor;
                         
-                        ecb.AddComponent<MegaBallTag>(ball);
-                        break;
-                    }
+                    Ecb.AddComponent<MegaBallTag>(ball);
+                    break;
                 }
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            }
+        }
     }
 }

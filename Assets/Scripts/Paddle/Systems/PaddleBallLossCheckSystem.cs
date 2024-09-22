@@ -1,28 +1,38 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class PaddleBallLossCheckSystem : SystemBase
+public partial struct PaddleBallLossCheckSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities
-            .WithAny<BallLostEvent>()
-            .ForEach((Entity paddle, in DynamicBuffer<BallLink> ballsBuffer) =>
-            {
-                if (ballsBuffer.IsEmpty)
-                    ecb.AddComponent(paddle, new PaddleDyingStateData());
-            }).Schedule();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        new PaddleBallHitJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    [WithAll(typeof(BallLostEvent))]
+    public partial struct PaddleBallHitJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        
+        private void Execute(Entity paddle, in DynamicBuffer<BallLink> ballsBuffer, 
+            EnabledRefRW<BallLostEvent> ballLostEvent)
+        {
+            if (ballsBuffer.IsEmpty)
+                Ecb.AddComponent(paddle, new PaddleDyingStateData());
+            ballLostEvent.ValueRW = false;
+        }
     }
 }

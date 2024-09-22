@@ -1,25 +1,21 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
-public partial class GameWinCheckSystem : SystemBase
+public partial struct GameWinCheckSystem : ISystem
 {
-    private EntityQuery _blocksQuery;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-
-        _blocksQuery = GetEntityQuery(new EntityQueryDesc {
-            None = new ComponentType[] { typeof(GoldBlock) }, All = new ComponentType[] { typeof(BlockData) }
-        });
-        
-        RequireForUpdate(GetEntityQuery(typeof(BallData)));
-        RequireForUpdate<GameProcessState>();
+        state.RequireForUpdate<BallData>();
+        state.RequireForUpdate<GameProcessState>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        if (_blocksQuery.IsEmpty)
-            EntityManager.AddSingleFrameComponent(new ChangeStateCommand { TargetState = typeof(GameWinState) });
+        var blocksQuery = SystemAPI.QueryBuilder().WithAll<BlockData>().WithNone<GoldBlock>().Build();
+        if (blocksQuery.IsEmpty)
+            state.EntityManager.AddSingleFrameComponent(ChangeStateCommand.Create<GameWinState>());
     }
 }

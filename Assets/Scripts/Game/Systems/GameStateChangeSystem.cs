@@ -1,37 +1,31 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(GameStateSystemGroup), OrderLast = true)]
-public partial class GameStateChangeSystem : SystemBase
+public partial struct GameStateChangeSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<GameStateData>();
-        RequireForUpdate<ChangeStateCommand>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<GameStateData>();
+        state.RequireForUpdate<ChangeStateCommand>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        var ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged);
         
         var command = SystemAPI.GetSingleton<ChangeStateCommand>();
         
-        Entities
-            .WithoutBurst()
-            .ForEach((Entity entity, ref GameStateData state) =>
+        foreach (var (gameState, entity) in SystemAPI.Query<RefRW<GameStateData>>().WithEntityAccess())
         {
-            ecb.RemoveComponent(entity, state.CurrentState);
+            ecb.RemoveComponent(entity, gameState.ValueRW.CurrentState);
             ecb.AddComponent(entity, command.TargetState);
 
-            state.CurrentState = command.TargetState;
-            
-        }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            gameState.ValueRW.CurrentState = command.TargetState;
+        }
     }
 }

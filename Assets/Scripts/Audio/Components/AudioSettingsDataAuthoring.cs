@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Entities;
 using UnityEngine;
 
@@ -9,10 +10,11 @@ public class AudioSettingsDataAuthoring : MonoBehaviour
     {
         public override void Bake(AudioSettingsDataAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
+            
             AddComponentObject(entity, new AudioSettingsData
             {
-                Clips = authoring.Clips
+                Clips = authoring.Clips.ToDictionary(clip => clip.Key, clip => clip.Clip)
             });       
         }
     }

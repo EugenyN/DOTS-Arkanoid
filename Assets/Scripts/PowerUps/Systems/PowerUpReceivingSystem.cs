@@ -1,46 +1,57 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup), OrderLast = true)]
 [UpdateAfter(typeof(PowerUpTriggeringSystem))]
-public partial class PowerUpReceivingSystem : SystemBase
+public partial struct PowerUpReceivingSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate( GetEntityQuery(new EntityQueryDesc {
-            All = new ComponentType[] { typeof(PowerUpReceivedEvent), typeof(PaddleData) }
-        }));
+        state.RequireForUpdate<GameSettings>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+
+        new PowerUpReceivingJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            PlayerDataLookup = SystemAPI.GetComponentLookup<PlayerData>(),
+            PowerUpScore = gameSettings.PowerUpScore,
+            BreakPowerUpScore = gameSettings.BreakPowerUpScore
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct PowerUpReceivingJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public ComponentLookup<PlayerData> PlayerDataLookup;
+        public int PowerUpScore;
+        public int BreakPowerUpScore;
         
-        Entities
-            .ForEach((Entity paddle, ref PaddleData paddleData, in
-                PowerUpReceivedEvent powerUpReceivedEvent, in OwnerPlayerId ownerPlayerId) =>
-            {
-                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
-                playerData.Score += powerUpReceivedEvent.Type == PowerUpType.Break ?
-                    gameSettings.BreakPowerUpScore : gameSettings.PowerUpScore;
+        private void Execute(ref PaddleData paddleData, ref PowerUpReceivedEvent powerUpReceivedEvent,
+            EnabledRefRW<PowerUpReceivedEvent> powerUpReceivedEventEnabledRef, in OwnerPlayerId ownerPlayerId)
+        {
+            var playerData = PlayerDataLookup[ownerPlayerId.Value];
+            
+            playerData.Score += powerUpReceivedEvent.Type == PowerUpType.Break ? BreakPowerUpScore : PowerUpScore;
+            
+            PlayerDataLookup[ownerPlayerId.Value] = playerData;
                 
-                SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
+            if (PowerUpsHelper.IsExclusivePowerUp(powerUpReceivedEvent.Type))
+                paddleData.ExclusivePowerUp = powerUpReceivedEvent.Type;
                 
-                if (PowerUpsHelper.IsExclusivePowerUp(powerUpReceivedEvent.Type))
-                    paddleData.ExclusivePowerUp = powerUpReceivedEvent.Type;
+            Ecb.DestroyEntity(powerUpReceivedEvent.PowerUp);
+
+            powerUpReceivedEventEnabledRef.ValueRW = false;
                 
-                ecb.DestroyEntity(powerUpReceivedEvent.PowerUp);
-                
-                AudioSystem.PlayAudio(ecb, AudioClipKeys.PowerUpReceived);
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            AudioSystem.PlayAudio(Ecb, AudioClipKeys.PowerUpReceived);
+        }
     }
 }

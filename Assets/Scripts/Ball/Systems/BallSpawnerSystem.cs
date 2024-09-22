@@ -1,56 +1,71 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
 [UpdateAfter(typeof(PaddleSpawnerSystem))]
-public partial class BallSpawnerSystem : SystemBase
+public partial struct BallSpawnerSystem : ISystem
 {
-    private BeginSimulationEntityCommandBufferSystem _beginSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<BallSpawnRequest>();
+        state.RequireForUpdate<GameSettings>();
+        state.RequireForUpdate<ScenePrefabs>();
+        state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<BallSpawnRequest>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
-        var gameSettings = SystemAPI.GetSingleton<GameSettings>();
-
-        var ecb = _beginSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities
-            .ForEach((in BallSpawnRequest spawnRequest) =>
-            {
-                var ball = ecb.Instantiate(prefabs.BallEntityPrefab);
-                ecb.SetName(ball, "Ball");
-                
-                ecb.AddComponent(ball, new BallData { OwnerPaddle = spawnRequest.OwnerPaddle });
-                ecb.AddComponent(ball, new OwnerPlayerId { Value = spawnRequest.OwnerPlayer });
-                ecb.SetComponent(ball, LocalTransform.FromPosition(spawnRequest.Position));
-
-                if (spawnRequest.StuckToPaddle)
-                    ecb.AddComponent(ball, new BallStuckToPaddle { StuckTime = gameSettings.BallMovingDelay });
-                else
-                    ecb.AddComponent(ball, new PhysicsVelocity { Linear = spawnRequest.Velocity, Angular = float3.zero });
-                
-                ecb.AddComponent(ball, new MaterialColorData { Value = new float4( 1, 1, 1, 1) });
-                ecb.AddComponent(ball, new MaterialTextureSTData());
-                
-                var playerIndex = SystemAPI.GetComponent<PlayerIndex>(spawnRequest.OwnerPlayer);
-                ecb.AddComponent(ball, new TextureAnimationData { FrameIndex = playerIndex.Value });
-                
-                ecb.AppendToBuffer(spawnRequest.OwnerPaddle, new BallLink { Ball = ball });
-
-                ecb.AddBuffer<SingleFrameComponent>(ball);
-            }).Schedule();
+        var ecbSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         
-        _beginSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        new BallSpawnerJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            Prefabs = SystemAPI.GetSingleton<ScenePrefabs>(),
+            GameSettings = SystemAPI.GetSingleton<GameSettings>(),
+            PlayerIndexLookup = SystemAPI.GetComponentLookup<PlayerIndex>(true)
+        }.Schedule();
+    }
+
+    [BurstCompile]
+    public partial struct BallSpawnerJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public ScenePrefabs Prefabs;
+        public GameSettings GameSettings;
+        
+        [ReadOnly] public ComponentLookup<PlayerIndex> PlayerIndexLookup;
+
+        private void Execute(in BallSpawnRequest spawnRequest)
+        {
+            var ball = Ecb.Instantiate(Prefabs.BallEntityPrefab);
+            Ecb.SetName(ball, "Ball");
+
+            Ecb.AddComponent(ball, new BallData { OwnerPaddle = spawnRequest.OwnerPaddle });
+            Ecb.AddComponent(ball, new OwnerPlayerId { Value = spawnRequest.OwnerPlayer });
+            Ecb.SetComponent(ball, LocalTransform.FromPosition(spawnRequest.Position));
+
+            if (spawnRequest.StuckToPaddle)
+                Ecb.AddComponent(ball, new BallStuckToPaddle { StuckTime = GameSettings.BallMovingDelay });
+            else
+                Ecb.AddComponent(ball, new PhysicsVelocity { Linear = spawnRequest.Velocity, Angular = float3.zero });
+
+            Ecb.AddComponent(ball, new MaterialColorData { Value = new float4(1, 1, 1, 1) });
+            Ecb.AddComponent(ball, new MaterialTextureSTData());
+
+            var playerIndex = PlayerIndexLookup[spawnRequest.OwnerPlayer];
+            Ecb.AddComponent(ball, new TextureAnimationData { FrameIndex = playerIndex.Value });
+
+            Ecb.AppendToBuffer(spawnRequest.OwnerPaddle, new BallLink { Ball = ball });
+
+            Ecb.AddComponent(ball, new MaterialTextureSTData());
+            
+            Ecb.AddBuffer<BallHitEvent>(ball);
+        }
     }
 }

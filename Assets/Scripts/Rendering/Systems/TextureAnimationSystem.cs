@@ -1,79 +1,92 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Mathematics;
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-public partial class TextureAnimationSystem : SystemBase
+public partial struct TextureAnimationSystem : ISystem
 {
-    private BeginSimulationEntityCommandBufferSystem _beginSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _beginSimulationEcbSystem.CreateCommandBuffer().AsParallelWriter();
-
-        var deltaTime = World.Time.DeltaTime;
-
-        Entities
-            .WithNone<PlayTextureAnimation>()
-            .ForEach((Entity entity, ref TextureAnimationData animation, ref MaterialTextureSTData textureSt,
-                in TextureSheetConfig config) =>
+        var ecbSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        
+        new TextureSTJob().Schedule();
+        
+        new TextureAnimationJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter(),
+            DeltaTime = SystemAPI.Time.DeltaTime
+        }.ScheduleParallel();
+    }
+    
+    [BurstCompile]
+    [WithNone(typeof(PlayTextureAnimation))]
+    public partial struct TextureSTJob : IJobEntity
+    {
+        private void Execute(ref TextureAnimationData animation, ref MaterialTextureSTData textureSt,
+            in TextureSheetConfig config)
+        {
+            textureSt.Value = GetTextureOffset(animation.FrameIndex, config);
+        }
+    }
+    
+    [BurstCompile]
+    public partial struct TextureAnimationJob : IJobEntity
+    {
+        public EntityCommandBuffer.ParallelWriter Ecb;
+        public float DeltaTime;
+        
+        private void Execute(Entity entity, ref TextureAnimationData animation,
+            ref MaterialTextureSTData textureSt, ref PlayTextureAnimation playAnimation,
+            in TextureSheetConfig config, [ChunkIndexInQuery] int chunkIndex)
+        {
+            animation.Time += DeltaTime;
+            if (animation.Time >= playAnimation.FrameTime)
             {
-                textureSt.Value = GetTextureOffset(animation.FrameIndex, config);
-            }).ScheduleParallel();
-
-        Entities
-            .ForEach((Entity entity, int entityInQueryIndex, ref TextureAnimationData animation,
-                ref MaterialTextureSTData textureSt, ref PlayTextureAnimation playAnimation,
-                in TextureSheetConfig config) =>
-            {
-                animation.Time += deltaTime;
-                if (animation.Time >= playAnimation.FrameTime)
+                if (!playAnimation.Initialized)
                 {
-                    if (!playAnimation.Initialized)
-                    {
-                        animation.FrameIndex = playAnimation.StartFrame;
-                        animation.IndexDecrement = false;
-                        playAnimation.Initialized = true;
-                    }
+                    animation.FrameIndex = playAnimation.StartFrame;
+                    animation.IndexDecrement = false;
+                    playAnimation.Initialized = true;
+                }
 
-                    animation.Time = 0.0f;
+                animation.Time = 0.0f;
 
-                    textureSt.Value = GetTextureOffset(animation.FrameIndex, config);
+                textureSt.Value = GetTextureOffset(animation.FrameIndex, config);
 
-                    if (playAnimation.Type == TextureAnimationType.PingPong)
+                if (playAnimation.Type == TextureAnimationType.PingPong)
+                {
+                    animation.FrameIndex += animation.IndexDecrement ? -1 : 1;
+                    if (animation.FrameIndex == playAnimation.StartFrame + playAnimation.FramesCount - 1 ||
+                        animation.FrameIndex == playAnimation.StartFrame)
                     {
-                        animation.FrameIndex += animation.IndexDecrement ? -1 : 1;
-                        if (animation.FrameIndex == playAnimation.StartFrame + playAnimation.FramesCount - 1 ||
-                            animation.FrameIndex == playAnimation.StartFrame)
-                        {
-                            animation.IndexDecrement = !animation.IndexDecrement;
-                        }
-                    }
-                    else
-                    {
-                        animation.FrameIndex++;
-                        if (animation.FrameIndex > playAnimation.StartFrame + playAnimation.FramesCount - 1)
-                        {
-                            animation.FrameIndex = playAnimation.StartFrame;
-                            if (playAnimation.Type == TextureAnimationType.Once)
-                                ecb.RemoveComponent<PlayTextureAnimation>(entityInQueryIndex, entity);
-                        }
+                        animation.IndexDecrement = !animation.IndexDecrement;
                     }
                 }
-            }).ScheduleParallel();
-
-        _beginSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                else
+                {
+                    animation.FrameIndex++;
+                    if (animation.FrameIndex > playAnimation.StartFrame + playAnimation.FramesCount - 1)
+                    {
+                        animation.FrameIndex = playAnimation.StartFrame;
+                        if (playAnimation.Type == TextureAnimationType.Once)
+                            Ecb.RemoveComponent<PlayTextureAnimation>(chunkIndex, entity);
+                    }
+                }
+            }
+        }
     }
 
     private static float4 GetTextureOffset(int frameIndex, in TextureSheetConfig config)
     {
         var offset = new float2((config.FrameColumns - 1) - (frameIndex % config.FrameColumns),
-                                (frameIndex / config.FrameColumns) % config.FrameRows);
+                                (int)(frameIndex / config.FrameColumns) % config.FrameRows);
         
         var spriteSize = 1f / new float2(config.FrameColumns, config.FrameRows);
         

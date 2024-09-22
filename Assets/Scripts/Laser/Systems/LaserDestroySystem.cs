@@ -1,24 +1,34 @@
+using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class LaserDestroySystem : SystemBase
+public partial struct LaserDestroySystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        
+        new LaserDestroyJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public partial struct LaserDestroyJob : IJobEntity
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities.ForEach((Entity entity, in HitByLaserEvent hitByLaser) =>
-        {
-            ecb.DestroyEntity(hitByLaser.LaserShot);
-        }).Schedule();
+        public EntityCommandBuffer Ecb;
         
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        private void Execute(in HitByLaserEvent hitByLaserEvent)
+        {
+            Ecb.DestroyEntity(hitByLaserEvent.LaserShot);
+        }
     }
 }

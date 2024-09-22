@@ -1,28 +1,33 @@
+using Unity.Burst;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial class SingleFrameEntitySystem : SystemBase
+public partial struct SingleFrameEntitySystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        
         if (!SystemAPI.HasSingleton<EventsHolderTag>())
         {
-            var entity = EntityManager.CreateEntity(typeof(EventsHolderTag));
-            EntityManager.AddBuffer<SingleFrameComponent>(entity);
+            var entity = state.EntityManager.CreateEntity();
+            state.EntityManager.AddComponent<EventsHolderTag>(entity);
+            state.EntityManager.AddBuffer<SingleFrameComponent>(entity);
         }
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities.WithAll<SingleFrameEntityTag>()
-            .ForEach((Entity entity) => { ecb.DestroyEntity(entity); }).Schedule();
-
-        Entities.ForEach((Entity entity, ref DynamicBuffer<SingleFrameComponent> components) =>
+        var ecbSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        
+        var ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged);
+        
+        foreach (var (_, entity) in SystemAPI.Query<RefRO<SingleFrameEntityTag>>().WithEntityAccess())
+            ecb.DestroyEntity(entity);
+       
+        foreach (var (components, entity) in SystemAPI.Query<DynamicBuffer<SingleFrameComponent>>().WithEntityAccess())
         {
             if (components.Length > 0)
             {
@@ -32,8 +37,6 @@ public partial class SingleFrameEntitySystem : SystemBase
                     components.RemoveAt(i);
                 }
             }
-        }).Run();
-
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        }
     }
 }

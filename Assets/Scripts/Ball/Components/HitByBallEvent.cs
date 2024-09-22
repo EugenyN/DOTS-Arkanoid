@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-public struct HitByBallEvent : IComponentData
+public struct HitByBallEvent : IComponentData, IEnableableComponent
 {
     public Entity Ball;
 }

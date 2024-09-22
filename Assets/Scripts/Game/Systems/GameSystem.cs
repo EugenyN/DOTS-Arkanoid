@@ -1,69 +1,68 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
-partial class GameSystem : SystemBase
+partial struct GameSystem : ISystem, ISystemStartStop
 {
-    private EntityQuery _gameDataQuery;
-    private EntityQuery _playersDataQuery;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _gameDataQuery = EntityManager.CreateEntityQuery(ComponentType.ReadWrite<GameData>());
-        _playersDataQuery = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerData>());
-        
-        RequireForUpdate<GameSettings>();
+        state.RequireForUpdate<GameSettings>();
     }
-
-    protected override void OnStartRunning()
+    
+    [BurstCompile]
+    public void OnStartRunning(ref SystemState state)
     {
-        base.OnStartRunning();
-        
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
-
-        var gameData = EntityManager.CreateEntity(typeof(GameData), typeof(GameStateData));
-        EntityManager.SetName(gameData, "GameData");
         
-        SystemAPI.SetComponent(gameData, new GameData { Level = gameSettings.StartLevel, HighScore = gameSettings.HighScore });
-        SystemAPI.SetComponent(gameData, new GameStateData { CurrentState = typeof(MainMenuState) });
+        var gameData = state.EntityManager.CreateEntity();
+        state.EntityManager.SetName(gameData, "GameData");
+        
+        state.EntityManager.AddComponentData(gameData, new GameData
+        {
+            Level = gameSettings.StartLevel, HighScore = gameSettings.HighScore
+        });
+        state.EntityManager.AddComponentData(gameData, new GameStateData
+        {
+            CurrentState = ComponentType.ReadWrite<MainMenuState>()
+        });
     }
 
-    protected override void OnUpdate()
+    public void OnStopRunning(ref SystemState state)
     {
     }
-    
-    public void StartGame(int playersCount)
-    {
-        var gameSettingsQuery = EntityManager.CreateEntityQuery(ComponentType.ReadOnly<GameSettings>());
-        var gameSettings = gameSettingsQuery.GetSingleton<GameSettings>();
-        
-        var gameData = _gameDataQuery.GetSingleton<GameData>();
-        gameData.Level = gameSettings.StartLevel;
-        gameData.PlayersCount = playersCount;
-        _gameDataQuery.SetSingleton(gameData);
 
-        EntityManager.AddSingleFrameComponent(new ChangeStateCommand { TargetState = typeof(GameProcessState) });
+    public static void StartGame(EntityManager entityManager, int playersCount)
+    {
+        GameUtils.TryGetSingleton<GameSettings>(entityManager, out var gameSettings);
+        GameUtils.TryGetSingletonRW<GameData>(entityManager, out var gameData);
+        
+        gameData.ValueRW.Level = gameSettings.StartLevel;
+        gameData.ValueRW.PlayersCount = playersCount;
+
+        entityManager.AddSingleFrameComponent(ChangeStateCommand.Create<GameStartState>());
     }
 
-    public void ExitGame()
+    public static void ExitGame(EntityManager entityManager)
     {
-        EntityManager.AddSingleFrameComponent(new LevelDespawnRequest());
-        EntityManager.DestroyEntity(_playersDataQuery);
-        EntityManager.AddSingleFrameComponent(new ChangeStateCommand { TargetState = typeof(MainMenuState) });
+        var playersDataQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<PlayerData>().Build(entityManager);
+        entityManager.AddSingleFrameComponent(new LevelDespawnRequest());
+        entityManager.DestroyEntity(playersDataQuery);
+        entityManager.AddSingleFrameComponent(ChangeStateCommand.Create<MainMenuState>());
         
-        SetPause(false);
+        SetPause(entityManager, false);
         
-        AudioSystem.StopAudio(EntityManager);
+        AudioSystem.StopAudio(entityManager);
     }
 
-    public void SetPause(bool pause)
+    public static void SetPause(EntityManager entityManager, bool pause)
     {
         UnityEngine.Time.timeScale = pause ? 0 : 1;
-        EntityManager.AddSingleFrameComponent(new GamePausedEvent { Paused = pause });
+        entityManager.AddSingleFrameComponent(new GamePausedEvent { Paused = pause });
     }
 
-    public bool IsGamePaused()
+    public static bool IsGamePaused()
     {
         return UnityEngine.Time.timeScale == 0;
     }

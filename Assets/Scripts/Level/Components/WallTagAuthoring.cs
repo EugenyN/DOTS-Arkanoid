@@ -7,8 +7,12 @@ public class WallTagAuthoring : MonoBehaviour
     {
         public override void Bake(WallTagAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity, new WallTag());
+            AddComponent(entity, new HitByBallEvent());
+            SetComponentEnabled<HitByBallEvent>(entity, false);
+            AddComponent(entity, new HitByLaserEvent());
+            SetComponentEnabled<HitByLaserEvent>(entity, false);
         }
     }
 }

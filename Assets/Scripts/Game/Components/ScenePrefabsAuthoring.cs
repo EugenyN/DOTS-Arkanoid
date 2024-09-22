@@ -14,7 +14,7 @@ public class ScenePrefabsAuthoring : MonoBehaviour
     {
         public override void Bake(ScenePrefabsAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity, new ScenePrefabs
             {
                 BallEntityPrefab = GetEntity(authoring.BallEntityPrefab, TransformUsageFlags.Dynamic),

@@ -1,30 +1,39 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class BallStartMovingInputProcessingSystem : SystemBase
+public partial struct BallStartMovingInputProcessingSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities
-            .WithNone<LaserPaddleTag>()
-            .ForEach((Entity paddle, ref PaddleInputData inputData, in DynamicBuffer<BallLink> ballsBuffer) =>
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        
+        new BallStartMovingInputProcessingJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    [WithNone(typeof(LaserPaddleTag))]
+    public partial struct BallStartMovingInputProcessingJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        
+        private void Execute(ref PaddleInputData inputData, in DynamicBuffer<BallLink> ballsBuffer)
+        {
+            if (inputData.Action == InputActionType.Fire)
             {
-                if (inputData.Action == InputActionType.Fire)
-                {
-                    foreach (var ball in ballsBuffer.Reinterpret<Entity>())
-                        ecb.AddComponent<BallStartMovingTag>(ball);
-                }
-            }).Schedule();
-
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                foreach (var ball in ballsBuffer.Reinterpret<Entity>())
+                    Ecb.AddComponent<BallStartMovingTag>(ball);
+            }
+        }
     }
 }

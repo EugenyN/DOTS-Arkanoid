@@ -1,28 +1,31 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
-public partial class GameOverSystem : SystemBase
+public partial struct GameOverSystem : ISystem, ISystemStartStop
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<GameOverState>();
+        state.RequireForUpdate<GameStateData>();
+        state.RequireForUpdate<GameData>();
+        state.RequireForUpdate<GameOverState>();
     }
-
-    protected override void OnStartRunning()
+    
+    [BurstCompile]
+    public void OnStartRunning(ref SystemState state)
     {
-        base.OnStartRunning();
-        
         int highScore = 0;
-        Entities.ForEach((in PlayerData playerData) => { highScore = math.max(highScore, playerData.Score); }).Run();
+        foreach (var playerData in SystemAPI.Query<RefRO<PlayerData>>()) 
+            highScore = math.max(highScore, playerData.ValueRO.Score);
         
         var gameData = SystemAPI.GetSingleton<GameData>();
         if (highScore > gameData.HighScore)
         {
             gameData.HighScore = highScore;
-            EntityManager.AddSingleFrameComponent(new HiScoreUpdatedEvent { Score = highScore });
+            state.EntityManager.AddSingleFrameComponent(new HiScoreUpdatedEvent { Score = highScore });
         }
         SystemAPI.SetSingleton(gameData);
         
@@ -30,25 +33,30 @@ public partial class GameOverSystem : SystemBase
         gameState.StateTimer = 5.0f;
         SystemAPI.SetSingleton(gameState);
 
-        AudioSystem.PlayAudio(EntityManager, AudioClipKeys.GameOver);
+        AudioSystem.PlayAudio(state.EntityManager, AudioClipKeys.GameOver);
+    }
+    
+    public void OnStopRunning(ref SystemState state)
+    {
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var gameState = SystemAPI.GetSingleton<GameStateData>();
 
         if (gameState.StateTimer > 0)
         {
-            gameState.StateTimer -= World.Time.DeltaTime;
+            gameState.StateTimer -= SystemAPI.Time.DeltaTime;
             SystemAPI.SetSingleton(gameState);
         }
         else
         {
             var ecb = new EntityCommandBuffer(Allocator.TempJob);
             ecb.AddSingleFrameComponent(new LevelDespawnRequest());
-            ecb.DestroyEntity(GetEntityQuery(typeof(PlayerData)));
-            ecb.AddSingleFrameComponent(new ChangeStateCommand { TargetState = typeof(MainMenuState) });
-            ecb.Playback(EntityManager);
+            ecb.DestroyEntity(SystemAPI.QueryBuilder().WithAll<PlayerData>().Build(), EntityQueryCaptureMode.AtPlayback);
+            ecb.AddSingleFrameComponent(ChangeStateCommand.Create<MainMenuState>());
+            ecb.Playback(state.EntityManager);
             ecb.Dispose();
         }
     }

@@ -1,71 +1,68 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
-public partial class GameWinSystem : SystemBase
+public partial struct GameWinSystem : ISystem, ISystemStartStop
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<GameWinState>();
+        state.RequireForUpdate<GameStateData>();
+        state.RequireForUpdate<GameWinState>();
     }
     
-    protected override void OnStartRunning()
+    [BurstCompile]
+    public void OnStartRunning(ref SystemState state)
     {
-        base.OnStartRunning();
-        
         var gameState = SystemAPI.GetSingleton<GameStateData>();
         gameState.StateTimer = 3.0f;
         SystemAPI.SetSingleton(gameState);
         
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
-
-        Entities.WithAny<PaddleData>().ForEach((Entity entity) =>
+        
+        foreach (var (_, entity) in SystemAPI.Query<PaddleData>().WithEntityAccess())
         {
             ecb.RemoveComponent<PhysicsCollider>(entity);
             ecb.RemoveComponent<PaddleInputData>(entity);
-        }).Run();
-
-        Entities.WithAny<PhysicsVelocity>().ForEach((Entity entity) =>
-        {
+        }
+        
+        foreach (var (_, entity) in SystemAPI.Query<PhysicsVelocity>().WithEntityAccess())
             ecb.RemoveComponent<PhysicsVelocity>(entity);
-        }).Run();
-
-        Entities.WithAny<PlayTextureAnimation>().ForEach((Entity entity) =>
-        {
+        
+        foreach (var (_, entity) in SystemAPI.Query<PlayTextureAnimation>().WithEntityAccess())
             ecb.RemoveComponent<PlayTextureAnimation>(entity);
-        }).Run();
             
-        ecb.Playback(EntityManager);
+        ecb.Playback(state.EntityManager);
         ecb.Dispose();
         
-        AudioSystem.PlayAudio(EntityManager, AudioClipKeys.RoundCleared);
+        AudioSystem.PlayAudio(state.EntityManager, AudioClipKeys.RoundCleared);
     }
 
-    protected override void OnUpdate()
+    public void OnStopRunning(ref SystemState state)
+    {
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
-
-        var deltaTime = World.Time.DeltaTime;
         
-        Entities.ForEach((Entity entity, ref GameData gameData, ref GameStateData gameStateData) =>
+        foreach (var (gameData, gameStateData) in SystemAPI.Query<RefRW<GameData>, RefRW<GameStateData>>())
         {
-            if (gameStateData.StateTimer > 0)
-                gameStateData.StateTimer -= deltaTime;
+            if (gameStateData.ValueRW.StateTimer > 0)
+                gameStateData.ValueRW.StateTimer -= SystemAPI.Time.DeltaTime;
             else
             {
-                gameData.Level++;
+                gameData.ValueRW.Level++;
             
                 ecb.AddSingleFrameComponent(new LevelDespawnRequest());
-                ecb.AddSingleFrameComponent(new ChangeStateCommand
-                {
-                    TargetState = ComponentType.ReadWrite<GameProcessState>()
-                });
+                ecb.AddSingleFrameComponent(ChangeStateCommand.Create<GameStartState>());
             }
-        }).Run();
-        
-        ecb.Playback(EntityManager);
+        }
+
+        ecb.Playback(state.EntityManager);
         ecb.Dispose();
     }
 }

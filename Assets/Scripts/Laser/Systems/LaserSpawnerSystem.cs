@@ -1,58 +1,55 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class LaserSpawnerSystem : SystemBase
+public partial struct LaserSpawnerSystem : ISystem
 {
     private const float LaserSpeed = 20;
     
-    private BeginSimulationEntityCommandBufferSystem _beginSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _beginSimulationEcbSystem = World.GetExistingSystemManaged<BeginSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<LaserSpawnRequest>();
+        state.RequireForUpdate<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<ScenePrefabs>();
+        state.RequireForUpdate<LaserSpawnRequest>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var prefabs = SystemAPI.GetSingleton<ScenePrefabs>();
-
-        var ecb = _beginSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities
-            .ForEach((in LaserSpawnRequest spawnRequest) =>
-            {
-                SpawnLaser(ecb, prefabs.LaserEntityPrefab, spawnRequest.Position, spawnRequest.OwnerPlayer);
-            }).Schedule();
+        var ecbSystem = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
         
-        _beginSimulationEcbSystem.AddJobHandleForProducer(Dependency);
-    }
-
-    private static void SpawnLaser(EntityCommandBuffer ecb, Entity prefab, float3 position, Entity ownerPlayerId)
-    {
-        var laserShot = ecb.Instantiate(prefab);
-        ecb.SetName(laserShot, "LaserShot");
-
-        ecb.AddComponent(laserShot, LocalTransform.FromPosition(position));
-        ecb.AddComponent(laserShot, new LaserShotTag());
-        ecb.AddComponent(laserShot, new PhysicsVelocity { Linear = new float3(0, LaserSpeed, 0), Angular = float3.zero });
-        ecb.AddComponent(laserShot, new OwnerPlayerId { Value = ownerPlayerId });
+        new LaserSpawnerJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            LaserEntityPrefab = prefabs.LaserEntityPrefab
+        }.Schedule();
     }
     
-    public void SpawnLaserShot(EntityCommandBuffer ecb, Entity paddle, Entity player)
+    [BurstCompile]
+    public partial struct LaserSpawnerJob : IJobEntity
     {
-        var paddleTransform = SystemAPI.GetComponent<LocalTransform>(paddle);
+        public EntityCommandBuffer Ecb;
+        public Entity LaserEntityPrefab;
         
-        ecb.AddSingleFrameComponent(new LaserSpawnRequest { 
-            Position = paddleTransform.Position + new float3(0, 1, 0), OwnerPlayer = player
-        });
+        private void Execute(in LaserSpawnRequest spawnRequest)
+        {
+            SpawnLaser(Ecb, LaserEntityPrefab, spawnRequest.Position, spawnRequest.OwnerPlayer);
+        }
         
-        AudioSystem.PlayAudio(ecb, AudioClipKeys.LaserShot);
+        private static void SpawnLaser(EntityCommandBuffer ecb, Entity prefab, float3 position, Entity ownerPlayerId)
+        {
+            var laserShot = ecb.Instantiate(prefab);
+            ecb.SetName(laserShot, "LaserShot");
+
+            ecb.AddComponent(laserShot, LocalTransform.FromPosition(position));
+            ecb.AddComponent(laserShot, new LaserShotTag());
+            ecb.AddComponent(laserShot, new PhysicsVelocity { Linear = new float3(0, LaserSpeed, 0), Angular = float3.zero });
+            ecb.AddComponent(laserShot, new OwnerPlayerId { Value = ownerPlayerId });
+        }
     }
 }

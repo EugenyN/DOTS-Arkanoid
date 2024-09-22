@@ -9,10 +9,19 @@ public struct BlockColorCode
     public BlockTypes Type;
 }
 
-public class LevelsSettings : IComponentData
+[Serializable]
+public struct LevelsData
+{
+    public BlobArray<BlobArray<Color32>> LevelsBlockData;
+    public BlobArray<BlockColorCode> BlocksPalette;
+}
+
+public struct LevelsSettings : IComponentData
 {
     public int BlocksInLine;
     public int BlockLinesCount;
-    public Texture2D[] LevelsData;
-    public BlockColorCode[] BlocksPalette;
+    public int GameAreaWidth;
+    public int GameAreaHeight;
+    public int MaxPlayers;
+    public BlobAssetReference<LevelsData> LevelsDataBlob;
 }

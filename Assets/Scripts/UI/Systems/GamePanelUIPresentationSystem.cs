@@ -1,81 +1,68 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial class GamePanelUIPresentationSystem : SystemBase
+public partial struct GamePanelUIPresentationSystem : ISystem
 {
-    private EntityQuery _gamePanelUIQuery;
-    private GamePanelUI _inGameUI;
-    
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _gamePanelUIQuery = GetEntityQuery(typeof(GamePanelUI));
-        
-        RequireForUpdate<GamePanelUI>();
-        RequireForUpdate<GameData>();
+        state.RequireForUpdate<GamePanelUI>();
+        state.RequireForUpdate<GameData>();
     }
 
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
-        if (_inGameUI == null)
-            _inGameUI = EntityManager.GetComponentObject<GamePanelUI>(_gamePanelUIQuery.GetSingletonEntity());
+        GameUtils.TryGetSingletonEntityManaged<GamePanelUI>(state.EntityManager, out var gamePanelUI);
+        var inGameUI = state.EntityManager.GetComponentObject<GamePanelUI>(gamePanelUI);
 
         var gameData = SystemAPI.GetSingleton<GameData>();
         
-        Entities
-            .WithoutBurst()
-            .ForEach((in ChangeStateCommand command) =>
+        foreach (var command in SystemAPI.Query<ChangeStateCommand>())
+        {
+            if (command.TargetState == typeof(MainMenuState))
             {
-                if (command.TargetState == typeof(MainMenuState))
-                {
-                    _inGameUI.gameObject.SetActive(false);
-                }
-                else if (command.TargetState == typeof(GameProcessState))
-                {
-                    _inGameUI.gameObject.SetActive(true);
+                inGameUI.gameObject.SetActive(false);
+            }
+            else if (command.TargetState == typeof(GameStartState))
+            {
+                inGameUI.gameObject.SetActive(true);
                     
-                    _inGameUI.SetPlayersCount(gameData.PlayersCount);
-                    _inGameUI.SetLevel(gameData.Level);
-                    _inGameUI.SetHighScore(gameData.HighScore);
-                    _inGameUI.SetGameAreaMessage($"ROUND {gameData.Level:D2}\n\nREADY!", 3.0f);
-                }
-                else if (command.TargetState == typeof(GameWinState))
-                {
-                    _inGameUI.SetGameAreaMessage(" YOU WIN !");
-                }
-                else if (command.TargetState == typeof(GameOverState))
-                {
-                    _inGameUI.SetGameAreaMessage("GAME OVER");
-                }
-                
-            }).Run();
-
-        Entities.WithoutBurst().ForEach((in GamePausedEvent gamePausedEvent) =>
+                inGameUI.SetPlayersCount(gameData.PlayersCount);
+                inGameUI.SetLevel(gameData.Level);
+                inGameUI.SetHighScore(gameData.HighScore);
+                inGameUI.SetGameAreaMessage($"ROUND {gameData.Level:D2}\n\nREADY!", 3.0f);
+            }
+            else if (command.TargetState == typeof(GameWinState))
+            {
+                inGameUI.SetGameAreaMessage(" YOU WIN !");
+            }
+            else if (command.TargetState == typeof(GameOverState))
+            {
+                inGameUI.SetGameAreaMessage("GAME OVER");
+            }
+        }
+        
+        foreach (var gamePausedEvent in SystemAPI.Query<GamePausedEvent>())
         {
             if (gamePausedEvent.Paused)
-                _inGameUI.SetGameAreaMessage("PAUSED");
+                inGameUI.SetGameAreaMessage("PAUSED");
             else
-                _inGameUI.ClearGameAreaMessages();
-        }).Run();
-
-        Entities.WithoutBurst().ForEach((in HiScoreUpdatedEvent hiScoreEvent) =>
-        {
-            _inGameUI.SetHighScore(hiScoreEvent.Score);
-            _inGameUI.SetGameAreaMessage($"GAME OVER\n\nNEW HIGH SCORE !\n{hiScoreEvent.Score}");
-        }).Run();
+                inGameUI.ClearGameAreaMessages();
+        }
         
-        Entities
-            .WithoutBurst()
-            .WithChangeFilter<PlayerData>()
-            .ForEach((Entity entity, in PlayerData playerData, in PlayerIndex playerIndex) =>
-            {
-                _inGameUI.SetPlayerLives(playerIndex.Value, playerData.Lives);
-                _inGameUI.SetPlayerScore(playerIndex.Value, playerData.Score);
+        foreach (var hiScoreEvent in SystemAPI.Query<HiScoreUpdatedEvent>())
+        {
+            inGameUI.SetHighScore(hiScoreEvent.Score);
+            inGameUI.SetGameAreaMessage($"GAME OVER\n\nNEW HIGH SCORE !\n{hiScoreEvent.Score}");
+        }
+        
+        foreach (var (playerData, playerIndex) in 
+                 SystemAPI.Query<PlayerData, PlayerIndex>().WithChangeFilter<PlayerData>())
+        {
+            inGameUI.SetPlayerLives(playerIndex.Value, playerData.Lives);
+            inGameUI.SetPlayerScore(playerIndex.Value, playerData.Score);
                 
-                if (playerData.Lives == 0)
-                    _inGameUI.SetGameOverMessage(playerIndex.Value, true);
-            }).Run();
+            if (playerData.Lives == 0)
+                inGameUI.SetGameOverMessage(playerIndex.Value, true);
+        }
     }
 }

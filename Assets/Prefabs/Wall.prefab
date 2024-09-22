@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3412169952803746902}
   - component: {fileID: 6327946610965544488}
   - component: {fileID: 6891802901567407801}
-  - component: {fileID: 3028872185441055814}
   - component: {fileID: 7769983418495891594}
   m_Layer: 10
   m_Name: Wall
@@ -28,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5479178889855886559}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 29, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3412169952803746902
 MeshFilter:
@@ -61,6 +60,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -96,18 +98,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8396a5dcf0d4c27a41f4dcef044aca3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &3028872185441055814
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5479178889855886559}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a44cb611d5a4ccebb1df9962b50c50f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!65 &7769983418495891594

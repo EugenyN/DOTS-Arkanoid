@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -7,89 +8,111 @@ using Unity.Transforms;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
 [UpdateAfter(typeof(PhysicsSystemGroup))]
-public partial class BallCollisionResolvingSystem : SystemBase
+public partial struct BallCollisionResolvingSystem : ISystem
 {
-    private EndFixedStepSimulationEntityCommandBufferSystem _endFixedStepSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endFixedStepSimulationEcbSystem = 
-            World.GetExistingSystemManaged<EndFixedStepSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<PhysicsWorldSingleton>();
     }
 
-    protected override unsafe void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endFixedStepSimulationEcbSystem.CreateCommandBuffer();
-
-        var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-
         var colliderCastHits = new NativeList<ColliderCastHit>(Allocator.TempJob);
+
+        state.Dependency = new BallCollisionResolvingJob
+        {
+            ColliderCastHits = colliderCastHits,
+            World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
+            LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            PaddleDataLookup = SystemAPI.GetComponentLookup<PaddleData>(true),
+            WallTagLookup = SystemAPI.GetComponentLookup<WallTag>(true),
+            BlockDataLookup = SystemAPI.GetComponentLookup<BlockData>(true),
+            MegaBallTagLookup = SystemAPI.GetComponentLookup<MegaBallTag>(true),
+            GoldBlockLookup = SystemAPI.GetComponentLookup<GoldBlock>(true),
+            HitByBallEventLookup = SystemAPI.GetComponentLookup<HitByBallEvent>()
+        }.Schedule(state.Dependency);
+
+        colliderCastHits.Dispose(state.Dependency);
+    }
+
+    [BurstCompile]
+    [WithAny(typeof(BallData))]
+    public partial struct BallCollisionResolvingJob : IJobEntity
+    {
+        public NativeList<ColliderCastHit> ColliderCastHits;
         
-        Entities
-            .WithAny<BallData>()
-            .WithReadOnly(physicsWorld)
-            .WithDisposeOnCompletion(colliderCastHits)
-            .ForEach(
-                (Entity entity, ref PhysicsVelocity velocity, in LocalTransform transform, in PhysicsCollider collider) =>
+        [ReadOnly] public CollisionWorld World;
+        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
+        [ReadOnly] public ComponentLookup<PaddleData> PaddleDataLookup;
+        [ReadOnly] public ComponentLookup<WallTag> WallTagLookup;
+        [ReadOnly] public ComponentLookup<BlockData> BlockDataLookup;
+        [ReadOnly] public ComponentLookup<MegaBallTag> MegaBallTagLookup;
+        [ReadOnly] public ComponentLookup<GoldBlock> GoldBlockLookup;
+        
+        public ComponentLookup<HitByBallEvent> HitByBallEventLookup;
+
+        private void Execute(Entity ball, ref PhysicsVelocity velocity, in LocalTransform transform,
+            in PhysicsCollider collider, ref DynamicBuffer<BallHitEvent> ballHitEvents)
+        {
+            ColliderCastHits.Clear();
+
+            unsafe
+            {
+                var colliderCastInput = new ColliderCastInput {
+                    Collider = collider.ColliderPtr, Start = transform.Position, End = transform.Position
+                };
+
+                World.CastCollider(colliderCastInput, ref ColliderCastHits);
+            }
+
+            if (ColliderCastHits.IsCreated && ColliderCastHits.Length != 0)
+            {
+                float distToHitEntity = float.MaxValue;
+                ColliderCastHit closestHit = default;
+
+                for (int i = 0; i < ColliderCastHits.Length; i++)
                 {
-                    colliderCastHits.Clear();
-
-                    var colliderCastInput = new ColliderCastInput
-                    {
-                        Collider = (Collider*)collider.Value.GetUnsafePtr(), Start = transform.Position,
-                        End = transform.Position
-                    };
+                    var hit = ColliderCastHits[i];
                     
-                    physicsWorld.CastCollider(colliderCastInput, ref colliderCastHits);
+                    HitByBallEventLookup[hit.Entity] = new HitByBallEvent { Ball = ball };
+                    HitByBallEventLookup.SetComponentEnabled(hit.Entity, true);
+                    
+                    ballHitEvents.Add(new BallHitEvent { HitEntity = hit.Entity });
 
-                    if (colliderCastHits.IsCreated && colliderCastHits.Length != 0)
+                    var hitEntityTransform = LocalTransformLookup[hit.Entity];
+                    var dist = math.distancesq(hitEntityTransform.Position, transform.Position);
+                    if (dist < distToHitEntity)
                     {
-                        float distToHitEntity = float.MaxValue;
-                        ColliderCastHit closestHit = default;
-
-                        for (int i = 0; i < colliderCastHits.Length; i++)
-                        {
-                            var hit = colliderCastHits[i];
-
-                            //PERF: structural changes
-                            ecb.AddSingleFrameComponent(hit.Entity, new HitByBallEvent { Ball = entity });
-                            ecb.AddSingleFrameComponent(entity, new BallHitEvent { HitEntity = hit.Entity });
-                            
-                            var hitEntityTransform = SystemAPI.GetComponent<LocalTransform>(hit.Entity);
-                            var dist = math.distancesq(hitEntityTransform.Position, transform.Position);
-                            if (dist < distToHitEntity)
-                            {
-                                distToHitEntity = dist;
-                                closestHit = hit;
-                            }
-                        }
-                        
-                        if (SystemAPI.HasComponent<PaddleData>(closestHit.Entity))
-                        {
-                            var paddleData = SystemAPI.GetComponent<PaddleData>(closestHit.Entity);
-                            var hitEntityTransform = SystemAPI.GetComponent<LocalTransform>(closestHit.Entity);
-                            ResolvePaddleCollision(ref velocity, transform.Position, hitEntityTransform.Position,
-                                paddleData.Size);
-                        }
-                        else if (SystemAPI.HasComponent<WallTag>(closestHit.Entity))
-                        {
-                            ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
-                        }
-                        else if (SystemAPI.HasComponent<BlockData>(closestHit.Entity))
-                        {
-                            if (SystemAPI.HasComponent<MegaBallTag>(entity) && !SystemAPI.HasComponent<GoldBlock>(closestHit.Entity))
-                            {
-                                // ignore
-                            }
-                            else
-                            {
-                                ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
-                            }
-                        }
+                        distToHitEntity = dist;
+                        closestHit = hit;
                     }
-                }).Schedule();
+                }
 
-        _endFixedStepSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                if (PaddleDataLookup.HasComponent(closestHit.Entity))
+                {
+                    var paddleData = PaddleDataLookup[closestHit.Entity];
+                    var hitTransform = LocalTransformLookup[closestHit.Entity];
+                    ResolvePaddleCollision(ref velocity, transform.Position, hitTransform.Position, paddleData.Size);
+                }
+                else if (WallTagLookup.HasComponent(closestHit.Entity))
+                {
+                    ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
+                }
+                else if (BlockDataLookup.HasComponent(closestHit.Entity))
+                {
+                    if (MegaBallTagLookup.HasComponent(ball) && !GoldBlockLookup.HasComponent(closestHit.Entity))
+                    {
+                        // ignore
+                    }
+                    else
+                    {
+                        ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
+                    }
+                }
+            }
+        }
     }
 
     private static bool ResolvePaddleCollision(ref PhysicsVelocity ballVelocity, float3 ballPosition,

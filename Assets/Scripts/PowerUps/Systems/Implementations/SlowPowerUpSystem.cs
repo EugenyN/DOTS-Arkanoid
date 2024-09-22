@@ -1,31 +1,45 @@
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class SlowPowerUpSystem : SystemBase
+public partial struct SlowPowerUpSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<GameData>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var gameData = SystemAPI.GetSingleton<GameData>();
         
-        Entities
-            .ForEach((Entity paddle, in PowerUpReceivedEvent request, in DynamicBuffer<BallLink> ballsBuffer) =>
+        new SlowPowerUpJob
+        {
+            PhysicsVelocityLookup = SystemAPI.GetComponentLookup<PhysicsVelocity>(),
+            BallSpeed = gameData.BallSpeed
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct SlowPowerUpJob : IJobEntity
+    {
+        public ComponentLookup<PhysicsVelocity> PhysicsVelocityLookup;
+        public float BallSpeed;
+        
+        private void Execute(in PowerUpReceivedEvent request, in DynamicBuffer<BallLink> ballsBuffer)
+        {
+            if (request.Type == PowerUpType.Slow)
             {
-                if (request.Type == PowerUpType.Slow)
+                foreach (var ball in ballsBuffer.Reinterpret<Entity>())
                 {
-                    foreach (var ball in ballsBuffer.Reinterpret<Entity>())
-                    {
-                        var velocity = SystemAPI.GetComponent<PhysicsVelocity>(ball);
-                        velocity.Linear = MathUtils.ClampMagnitude(velocity.Linear, gameData.BallSpeed);
-                        SystemAPI.SetComponent(ball, velocity);
-                    }
+                    var velocity = PhysicsVelocityLookup[ball];
+                    velocity.Linear = MathUtils.ClampMagnitude(velocity.Linear, BallSpeed * 0.75f);
+                    PhysicsVelocityLookup[ball] = velocity;
                 }
-            }).Schedule();
+            }
+        }
     }
 }

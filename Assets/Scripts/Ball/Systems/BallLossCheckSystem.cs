@@ -1,36 +1,49 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class BallLossCheckSystem : SystemBase
+public partial struct BallLossCheckSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities.ForEach((Entity entity, in LocalTransform transform, in BallData ballData) =>
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+        new BallLossCheckJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            BallsBufferLookup = SystemAPI.GetBufferLookup<BallLink>(),
+            BallLostEventLookup = SystemAPI.GetComponentLookup<BallLostEvent>()
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct BallLossCheckJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public BufferLookup<BallLink> BallsBufferLookup;
+        public ComponentLookup<BallLostEvent> BallLostEventLookup;
+        
+        private void Execute(Entity entity, in LocalTransform transform, in BallData ballData)
         {
             if (transform.Position.y <= 0)
             {
-                ecb.AddSingleFrameComponent(ballData.OwnerPaddle, new BallLostEvent());
-                ecb.DestroyEntity(entity);
+                BallLostEventLookup.SetComponentEnabled(ballData.OwnerPaddle, true);
+                Ecb.DestroyEntity(entity);
 
-                var ballsBuffer = SystemAPI.GetBuffer<BallLink>(ballData.OwnerPaddle);
+                var ballsBuffer = BallsBufferLookup[ballData.OwnerPaddle];
                 for (int i = ballsBuffer.Length - 1; i >= 0; i--)
                 {
                     if (ballsBuffer[i].Ball == entity)
                         ballsBuffer.RemoveAtSwapBack(i);
                 }
             }
-        }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        }
     }
 }

@@ -10,7 +10,7 @@ public class PaddleMaterialsConfigAuthoring : MonoBehaviour
     {
         public override void Bake(PaddleMaterialsConfigAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponentObject(entity, new PaddleMaterialsConfig
             {
                 NormalPaddleMaterial = authoring.NormalPaddleMaterial,

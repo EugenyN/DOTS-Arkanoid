@@ -1,27 +1,25 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
-public partial class GameOverCheckSystem : SystemBase
+public partial struct GameOverCheckSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<GameProcessState>();
-        RequireForUpdate<PlayerData>();
+        state.RequireForUpdate<GameProcessState>();
+        state.RequireForUpdate<PlayerData>();
     }
-
-    protected override void OnUpdate()
+    
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         bool anyAlive = false;
-
-        Entities.ForEach((in PlayerData playerData) =>
-        {
-            anyAlive |= playerData.Lives != 0;
-        }).Run();
+        
+        foreach (var playerData in SystemAPI.Query<RefRO<PlayerData>>()) 
+            anyAlive |= playerData.ValueRO.Lives != 0;
 
         if (!anyAlive)
-        {
-            EntityManager.AddSingleFrameComponent(new ChangeStateCommand { TargetState = typeof(GameOverState) });
-        }
+            state.EntityManager.AddSingleFrameComponent(ChangeStateCommand.Create<GameOverState>());
     }
 }

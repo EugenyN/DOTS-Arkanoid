@@ -1,5 +1,5 @@
 ﻿using Unity.Entities;
 
-public struct BallLostEvent : IComponentData
+public struct BallLostEvent : IComponentData, IEnableableComponent
 {
 }

@@ -1,23 +1,16 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class PauseInputProcessingSystem : SystemBase
+public partial struct PauseInputProcessingSystem : ISystem
 {
-    private GameSystem _gameSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        _gameSystem = World.GetExistingSystemManaged<GameSystem>();
-    }
-
-    protected override void OnUpdate()
-    {
-        Entities
-            .WithoutBurst()
-            .ForEach((Entity paddle, ref PaddleInputData inputData) =>
-            {
-                if (inputData.Action == InputActionType.Pause)
-                    _gameSystem.SetPause(!_gameSystem.IsGamePaused());
-            }).Run();
+        foreach (var inputData in SystemAPI.Query<RefRO<PaddleInputData>>())
+        {
+            if (inputData.ValueRO.Action == InputActionType.Pause)
+                GameSystem.SetPause(state.EntityManager, !GameSystem.IsGamePaused());
+        }
     }
 }

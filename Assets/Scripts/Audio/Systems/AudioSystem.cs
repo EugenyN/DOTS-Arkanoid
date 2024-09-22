@@ -1,57 +1,48 @@
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-public partial class AudioSystem : SystemBase
+public partial struct AudioSystem : ISystem, ISystemStartStop
 {
     private Entity _audioSource;
     
-    private readonly Dictionary<AudioClipKeys, AudioClip> _clips = new();
-
-    protected override void OnCreate()
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        RequireForUpdate<AudioSource>();
+        state.RequireForUpdate<AudioSource>();
+    } 
+
+    public void OnStartRunning(ref SystemState state)
+    {
+        _audioSource = SystemAPI.QueryBuilder().WithAll<AudioSource>().Build().GetSingletonEntity();
+    }
+    
+    public void OnStopRunning(ref SystemState state)
+    {
     }
 
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-        
-        _audioSource = GetEntityQuery(typeof(AudioSource)).GetSingletonEntity();
-
-        var audioSettings = SystemAPI.ManagedAPI.GetSingleton<AudioSettingsData>();
-        foreach (var clip in audioSettings.Clips)
-            _clips.Add(clip.Key, clip.Clip);
-    }
-
-    protected override void OnUpdate()
+    public void OnUpdate(ref SystemState state)
     {
         var ecb = new EntityCommandBuffer(Allocator.Temp);
+        
+        foreach (var (stopAudioSource,  e) in SystemAPI.Query<RefRO<StopAudioSource>>().WithEntityAccess())
+        {
+            var audioSourceM = state.EntityManager.GetComponentObject<AudioSource>(_audioSource);
+            audioSourceM.Stop();
+            ecb.DestroyEntity(e);
+        }
+        
+        foreach (var (startAudioSource,  e) in SystemAPI.Query<RefRO<StartAudioSource>>().WithEntityAccess())
+        {
+            var audioSettings = SystemAPI.ManagedAPI.GetSingleton<AudioSettingsData>();
+            
+            var audioSourceM = state.EntityManager.GetComponentObject<AudioSource>(_audioSource);
+            audioSourceM.clip = audioSettings.Clips[startAudioSource.ValueRO.Key];
+            audioSourceM.Play();
+            ecb.DestroyEntity(e);
+        }
 
-        Entities
-            .WithoutBurst()
-            .ForEach((Entity e, ref StopAudioSource stopAudioSource) =>
-            {
-                var audioSourceM = EntityManager.GetComponentObject<AudioSource>(_audioSource);
-                audioSourceM.Stop();
-                ecb.DestroyEntity(e);
-            }).Run();
-
-        Entities
-            .WithoutBurst()
-            .ForEach((Entity e, in StartAudioSource startAudioSource) =>
-            {
-                var audioSourceM = EntityManager.GetComponentObject<AudioSource>(_audioSource);
-                audioSourceM.clip = _clips[startAudioSource.Key];
-                audioSourceM.Play();
-                ecb.DestroyEntity(e);
-            }).Run();
-
-        ecb.Playback(EntityManager);
+        ecb.Playback(state.EntityManager);
         ecb.Dispose();
     }
 

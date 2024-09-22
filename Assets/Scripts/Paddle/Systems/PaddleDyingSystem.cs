@@ -1,46 +1,58 @@
 ﻿using System;
-using Unity.Collections;
+using Unity.Burst;
 using Unity.Entities;
 using Unity.Physics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class PaddleDyingSystem : SystemBase
+public partial struct PaddleDyingSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        var deltaTime = World.Time.DeltaTime;
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((Entity paddle, ref PaddleDyingStateData dyingPaddle, ref MaterialColorData materialColor,
-                in OwnerPlayerId ownerPlayerId) =>
-            {
+        new PaddleDyingJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            PlayerDataLookup = SystemAPI.GetComponentLookup<PlayerData>(),
+            DeltaTime = SystemAPI.Time.DeltaTime
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct PaddleDyingJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public ComponentLookup<PlayerData> PlayerDataLookup;
+        public float DeltaTime;
+        
+        private void Execute(Entity paddle, ref PaddleDyingStateData dyingPaddle, ref MaterialColorData materialColor,
+            in OwnerPlayerId ownerPlayerId)
+        {
                 if (dyingPaddle.StateTimer > 0)
                 {
-                    dyingPaddle.StateTimer -= deltaTime;
+                    dyingPaddle.StateTimer -= DeltaTime;
                     return;
                 }
 
-                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
+                var playerData = PlayerDataLookup[ownerPlayerId.Value];
                 
                 switch (dyingPaddle.State)
                 {
                     case PaddleDyingState.Dying:
                         
-                        ecb.RemoveComponent<PhysicsCollider>(paddle);
-                        ecb.RemoveComponent<PaddleInputData>(paddle);
-                        ecb.RemoveComponent<PlayTextureAnimation>(paddle);
+                        Ecb.RemoveComponent<PhysicsCollider>(paddle);
+                        Ecb.RemoveComponent<PaddleInputData>(paddle);
+                        Ecb.RemoveComponent<PlayTextureAnimation>(paddle);
                         
-                        AudioSystem.PlayAudio(ecb, AudioClipKeys.BallLoss);
+                        AudioSystem.PlayAudio(Ecb, AudioClipKeys.BallLoss);
 
                         materialColor.Value *= 0.5f;
                         
@@ -49,7 +61,7 @@ public partial class PaddleDyingSystem : SystemBase
                         break;
                     case PaddleDyingState.DyingComplete:
                         
-                        ecb.RemoveComponent<LocalToWorld>(paddle); // hide entity
+                        Ecb.RemoveComponent<LocalToWorld>(paddle); // hide entity
                         
                         dyingPaddle.State = PaddleDyingState.RespawnOrGameOver;
                         
@@ -58,19 +70,17 @@ public partial class PaddleDyingSystem : SystemBase
                         break;
                     case PaddleDyingState.RespawnOrGameOver:
                         playerData.Lives--;
-                        SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
+                        PlayerDataLookup[ownerPlayerId.Value] = playerData;
                         
                         if (playerData.Lives != 0)
-                            ecb.AddSingleFrameComponent(new PaddleSpawnRequest { OwnerPlayer = ownerPlayerId.Value });
+                            Ecb.AddSingleFrameComponent(new PaddleSpawnRequest { OwnerPlayer = ownerPlayerId.Value });
 
-                        ecb.DestroyEntity(paddle);
+                        Ecb.DestroyEntity(paddle);
                         
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Rendering;
@@ -9,7 +10,7 @@ using BoxCollider = Unity.Physics.BoxCollider;
 using Collider = Unity.Physics.Collider;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class EnlargePowerUpSystem : SystemBase
+public partial struct EnlargePowerUpSystem : ISystem, ISystemStartStop
 {
     private BlobAssetReference<Collider> _normalColliderBlobAssetRef;
     private BlobAssetReference<Collider> _bigColliderBlobAssetRef;
@@ -17,17 +18,14 @@ public partial class EnlargePowerUpSystem : SystemBase
     private BatchMaterialID _normalPaddleMaterial;
     private BatchMaterialID _bigPaddleMaterial;
 
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<GameSettings>();
     }
     
-    protected override void OnStartRunning()
+    public void OnStartRunning(ref SystemState state)
     {
-        base.OnStartRunning();
-        
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
 
         if (!_normalColliderBlobAssetRef.IsCreated)
@@ -47,8 +45,8 @@ public partial class EnlargePowerUpSystem : SystemBase
                 BevelRadius = 0.0f
             });
         }
-
-        var hybridRendererSystem = World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
+        
+        var hybridRendererSystem = state.World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
         
         var materialsConfig = SystemAPI.ManagedAPI.GetSingleton<PaddleMaterialsConfig>();
         
@@ -57,11 +55,14 @@ public partial class EnlargePowerUpSystem : SystemBase
         if (_bigPaddleMaterial == BatchMaterialID.Null)
             _bigPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.BigPaddleMaterial);
     }
-
-    protected override void OnDestroy()
+    
+    public void OnStopRunning(ref SystemState state)
     {
-        base.OnDestroy();
-        
+    }
+
+    [BurstCompile]
+    public void OnDestroy(ref SystemState state)
+    {
         if (_normalColliderBlobAssetRef.IsCreated)
             _normalColliderBlobAssetRef.Dispose();
         if (_bigColliderBlobAssetRef.IsCreated)
@@ -70,46 +71,61 @@ public partial class EnlargePowerUpSystem : SystemBase
         // unregister materials ?
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
-
-        var normalColliderBlobAssetRef = _normalColliderBlobAssetRef;
-        var bigColliderBlobAssetRef = _bigColliderBlobAssetRef;
-
-        var normalPaddleMaterial = _normalPaddleMaterial;
-        var bigPaddleMaterial = _bigPaddleMaterial;
-
-        Entities
-            .ForEach((Entity paddle, ref PaddleData paddleData, ref PostTransformMatrix paddleScale,
-                ref PhysicsCollider collider, ref MaterialMeshInfo mmi, in PowerUpReceivedEvent request) =>
-            {
-                if (paddleData.ExclusivePowerUp == request.Type)
-                    return;
-
-                if (paddleData.ExclusivePowerUp == PowerUpType.Enlarge && PowerUpsHelper.IsExclusivePowerUp(request.Type))
-                {
-                    ResizeCollider(ref paddleData, ref paddleScale, ref collider, gameSettings.PaddleSize,
-                        normalColliderBlobAssetRef);
-                    mmi.MaterialID = normalPaddleMaterial;
-                }
-                
-                if (request.Type == PowerUpType.Enlarge)
-                {
-                    ResizeCollider(ref paddleData, ref paddleScale, ref collider, gameSettings.BigPaddleSize,
-                        bigColliderBlobAssetRef);
-                    mmi.MaterialID = bigPaddleMaterial;
-                }
-            }).Run();
-    }
-
-    private static void ResizeCollider(ref PaddleData paddleData, ref PostTransformMatrix paddleScale, 
-                                ref PhysicsCollider collider, float3 size, BlobAssetReference<Collider> blobAssetReference)
-    {
-        Debug.Assert(!paddleData.Size.Equals(size));
         
-        paddleData.Size = size;
-        paddleScale.Value = float4x4.Scale(size);
-        collider.Value = blobAssetReference;
+        new EnlargePowerUpJob
+        {
+            PaddleSize = gameSettings.PaddleSize,
+            BigPaddleSize = gameSettings.BigPaddleSize,
+            NormalColliderBlobAssetRef = _normalColliderBlobAssetRef,
+            BigColliderBlobAssetRef = _bigColliderBlobAssetRef,
+            NormalPaddleMaterial =_normalPaddleMaterial,
+            BigPaddleMaterial = _bigPaddleMaterial
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct EnlargePowerUpJob : IJobEntity
+    {
+        public float3 PaddleSize;
+        public float3 BigPaddleSize;
+        
+        public BlobAssetReference<Collider> NormalColliderBlobAssetRef;
+        public BlobAssetReference<Collider> BigColliderBlobAssetRef;
+
+        public BatchMaterialID NormalPaddleMaterial;
+        public BatchMaterialID BigPaddleMaterial;
+        
+        private void Execute(ref PaddleData paddleData, ref PostTransformMatrix paddleScale,
+            ref PhysicsCollider collider, ref MaterialMeshInfo mmi, in PowerUpReceivedEvent request)
+        {
+            if (paddleData.ExclusivePowerUp == request.Type)
+                return;
+
+            if (paddleData.ExclusivePowerUp == PowerUpType.Enlarge && PowerUpsHelper.IsExclusivePowerUp(request.Type))
+            {
+                ResizeCollider(ref paddleData, ref paddleScale, ref collider, PaddleSize, NormalColliderBlobAssetRef);
+                mmi.MaterialID = NormalPaddleMaterial;
+            }
+                
+            if (request.Type == PowerUpType.Enlarge)
+            {
+                ResizeCollider(ref paddleData, ref paddleScale, ref collider, BigPaddleSize, BigColliderBlobAssetRef);
+                mmi.MaterialID = BigPaddleMaterial;
+            }
+        }
+        
+        private static void ResizeCollider(ref PaddleData paddleData, ref PostTransformMatrix paddleScale, 
+            ref PhysicsCollider collider, float3 size, BlobAssetReference<Collider> blobAssetReference)
+        {
+            Debug.Assert(!paddleData.Size.Equals(size));
+        
+            paddleData.Size = size;
+            paddleScale.Value = float4x4.Scale(size);
+            collider.Value = blobAssetReference;
+        }
     }
 }

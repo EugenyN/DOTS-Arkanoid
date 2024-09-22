@@ -1,23 +1,42 @@
+using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Physics;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class BallSpeedIncreaseSystem : SystemBase
+public partial struct BallSpeedIncreaseSystem : ISystem
 {
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        RequireForUpdate<BallHitEvent>();
+        state.RequireForUpdate<GameSettings>();
     }
-    
-    protected override void OnUpdate()
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
-
-        Entities.ForEach((ref PhysicsVelocity velocity, in BallHitEvent hitEvent) =>
+        
+        new BallSpeedIncreaseJob
         {
-            if (SystemAPI.HasComponent<PaddleData>(hitEvent.HitEntity))
-                velocity.Linear *= gameSettings.BallSpeedIncreaseFactor;
-        }).Schedule();
+            PaddleDataLookup = SystemAPI.GetComponentLookup<PaddleData>(true),
+            BallSpeedIncreaseFactor = gameSettings.BallSpeedIncreaseFactor
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct BallSpeedIncreaseJob : IJobEntity
+    {
+        [ReadOnly] public ComponentLookup<PaddleData> PaddleDataLookup;
+        public float BallSpeedIncreaseFactor;
+        
+        private void Execute(ref PhysicsVelocity velocity, in DynamicBuffer<BallHitEvent> ballHitEvents)
+        {
+            foreach (var ballHitEvent in ballHitEvents)
+            {
+                if (PaddleDataLookup.HasComponent(ballHitEvent.HitEntity))
+                    velocity.Linear *= BallSpeedIncreaseFactor;
+            }
+        }
     }
 }

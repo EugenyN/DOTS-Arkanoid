@@ -1,35 +1,46 @@
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class PaddleBallHitSystem : SystemBase
+public partial struct PaddleBallHitSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate(GetEntityQuery(typeof(HitByBallEvent), typeof(PaddleData)));
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<PaddleData>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((Entity paddle, in HitByBallEvent hitByBall, in OwnerPlayerId ownerPlayerId) =>
-            {
-                var playerData = SystemAPI.GetComponent<PlayerData>(ownerPlayerId.Value);
-                playerData.Score += 10;
-                SystemAPI.SetComponent(ownerPlayerId.Value, playerData);
+        new PaddleBallHitJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            PlayerDataLookup = SystemAPI.GetComponentLookup<PlayerData>(),
+            StickPaddleTagLookup = SystemAPI.GetComponentLookup<StickPaddleTag>()
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    [WithAll(typeof(HitByBallEvent))]
+    public partial struct PaddleBallHitJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public ComponentLookup<PlayerData> PlayerDataLookup;
+        [ReadOnly] public ComponentLookup<StickPaddleTag> StickPaddleTagLookup;
+        
+        private void Execute(Entity paddle, in OwnerPlayerId ownerPlayerId)
+        {
+            var playerData = PlayerDataLookup[ownerPlayerId.Value];
+            playerData.Score += 10;
+            PlayerDataLookup[ownerPlayerId.Value] = playerData;
 
-                AudioSystem.PlayAudio(ecb, SystemAPI.HasComponent<StickPaddleTag>(paddle) ? 
-                    AudioClipKeys.PaddleCatch : AudioClipKeys.PaddleHit);
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            AudioSystem.PlayAudio(Ecb, StickPaddleTagLookup.HasComponent(paddle) ? 
+                AudioClipKeys.PaddleCatch : AudioClipKeys.PaddleHit);
+        }
     }
 }

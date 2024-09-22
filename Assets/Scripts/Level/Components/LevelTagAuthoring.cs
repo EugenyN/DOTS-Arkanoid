@@ -7,7 +7,7 @@ public class LevelTagAuthoring : MonoBehaviour
     {
         public override void Bake(LevelTagAuthoring authoring)
         {
-            var entity = GetEntity(TransformUsageFlags.Dynamic);
+            var entity = GetEntity(TransformUsageFlags.None);
             AddComponent(entity, new LevelTag());
         }
     }

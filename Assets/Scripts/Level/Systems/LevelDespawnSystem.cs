@@ -1,31 +1,28 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Rendering;
 
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateAfter(typeof(PowerUpsSystemGroup))]
 [UpdateBefore(typeof(VariableRateSimulationSystemGroup))]
-public partial class LevelDespawnSystem : SystemBase
+public partial struct LevelDespawnSystem : ISystem
 {
-    private EntityQuery _despawnQuery;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _despawnQuery = GetEntityQuery(new EntityQueryDesc
-        {
-            Any = new [] { ComponentType.ReadOnly<RenderBounds>(), ComponentType.ReadOnly<LevelTag>() }
-        });
-        
-        RequireForUpdate(GetEntityQuery(typeof(LevelDespawnRequest)));
+        state.RequireForUpdate<LevelDespawnRequest>();
     }
 
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
-        ecb.DestroyEntity(_despawnQuery);
-        ecb.Playback(EntityManager);
+        
+        var despawnQuery = SystemAPI.QueryBuilder().WithAny<RenderBounds, LevelTag>().Build();
+        ecb.DestroyEntity(despawnQuery, EntityQueryCaptureMode.AtPlayback);
+        
+        ecb.Playback(state.EntityManager);
         ecb.Dispose();
     }
 }

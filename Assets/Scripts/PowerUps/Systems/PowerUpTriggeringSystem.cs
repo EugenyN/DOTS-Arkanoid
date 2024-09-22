@@ -4,56 +4,51 @@ using Unity.Entities;
 using Unity.Physics;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup), OrderFirst = true)]
-public partial class PowerUpTriggeringSystem : SystemBase
+public partial struct PowerUpTriggeringSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-
-        RequireForUpdate(GetEntityQuery(typeof(PowerUpData)));
+        state.RequireForUpdate<SimulationSingleton>();
+        state.RequireForUpdate<PowerUpData>();
     }
-
+    
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        state.Dependency = new PowerUpTriggeringJob
+        {
+            PowerUpDataLookup = SystemAPI.GetComponentLookup<PowerUpData>(true),
+            PaddleDataLookup = SystemAPI.GetComponentLookup<PaddleData>(true),
+            PowerUpReceivedEventLookup = SystemAPI.GetComponentLookup<PowerUpReceivedEvent>(),
+        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), state.Dependency);
+    }
+    
     [BurstCompile]
     private struct PowerUpTriggeringJob : ITriggerEventsJob
     {
-        public EntityCommandBuffer Ecb;
-        
-        [ReadOnly]
-        public ComponentLookup<PowerUpData> PowerUps;
-        [ReadOnly]
-        public ComponentLookup<PaddleData> Paddles;
+        [ReadOnly] public ComponentLookup<PowerUpData> PowerUpDataLookup;
+        [ReadOnly] public ComponentLookup<PaddleData> PaddleDataLookup;
+        public ComponentLookup<PowerUpReceivedEvent> PowerUpReceivedEventLookup;
         
         public void Execute(TriggerEvent triggerEvent)
         {
             var entityA = triggerEvent.EntityA;
             var entityB = triggerEvent.EntityB;
             
-            var powerUpEntity = PowerUps.HasComponent(entityA) ? entityA : 
-                PowerUps.HasComponent(entityB) ? entityB : Entity.Null;
+            var powerUpEntity = PowerUpDataLookup.HasComponent(entityA) ? entityA : 
+                PowerUpDataLookup.HasComponent(entityB) ? entityB : Entity.Null;
             
-            var paddleEntity = Paddles.HasComponent(entityA) ? entityA :
-                Paddles.HasComponent(entityB) ? entityB : Entity.Null;
+            var paddleEntity = PaddleDataLookup.HasComponent(entityA) ? entityA :
+                PaddleDataLookup.HasComponent(entityB) ? entityB : Entity.Null;
 
             if (paddleEntity != Entity.Null && powerUpEntity != Entity.Null)
             {
-                Ecb.AddSingleFrameComponent(paddleEntity, new PowerUpReceivedEvent { 
-                    PowerUp = powerUpEntity, Type = PowerUps[powerUpEntity].Type
-                });
+                PowerUpReceivedEventLookup[paddleEntity] = new PowerUpReceivedEvent {
+                    PowerUp = powerUpEntity, Type = PowerUpDataLookup[powerUpEntity].Type
+                };
+                PowerUpReceivedEventLookup.SetComponentEnabled(paddleEntity, true);
             }
         }
-    }
-
-    protected override void OnUpdate()
-    {
-        Dependency = new PowerUpTriggeringJob
-        {
-            PowerUps = GetComponentLookup<PowerUpData>(true),
-            Paddles = GetComponentLookup<PaddleData>(true),
-            Ecb = _endSimulationEcbSystem.CreateCommandBuffer()
-        }.Schedule(SystemAPI.GetSingleton<SimulationSingleton>(), Dependency);
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
     }
 }

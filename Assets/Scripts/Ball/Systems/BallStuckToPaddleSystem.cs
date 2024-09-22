@@ -1,43 +1,53 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(BallBlockPaddleSystemGroup))]
-public partial class BallStuckToPaddleSystem : SystemBase
+public partial struct BallStuckToPaddleSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        _endSimulationEcbSystem = World.GetExistingSystemManaged<EndSimulationEntityCommandBufferSystem>();
-
-        RequireForUpdate<BallStuckToPaddle>();
-        RequireForUpdate<GameProcessState>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+        state.RequireForUpdate<BallStuckToPaddle>();
+        state.RequireForUpdate<GameProcessState>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        var deltaTime = World.Time.DeltaTime;
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities.ForEach((Entity entity, ref BallStuckToPaddle stuckData, in BallData data) =>
+        new BallStuckToPaddleJob
         {
-            stuckData.StuckTime -= deltaTime;
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(),
+            DeltaTime = SystemAPI.Time.DeltaTime
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct BallStuckToPaddleJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        public ComponentLookup<LocalTransform> LocalTransformLookup;
+        public float DeltaTime;
+        
+        private void Execute(Entity entity, ref BallStuckToPaddle stuckData, in BallData data)
+        {
+            stuckData.StuckTime -= DeltaTime;
 
             if (stuckData.StuckTime <= 0.0f)
             {
-                ecb.AddComponent(entity, new BallStartMovingTag());
+                Ecb.AddComponent(entity, new BallStartMovingTag());
             }
             else
             {
-                var paddleTransform = SystemAPI.GetComponent<LocalTransform>(data.OwnerPaddle);
-                var position = LocalTransform.FromPosition(
+                var paddleTransform = LocalTransformLookup[data.OwnerPaddle];
+                LocalTransformLookup[entity] = LocalTransform.FromPosition(
                     paddleTransform.Position + new float3(stuckData.Offset, 1, 0));
-                SystemAPI.SetComponent(entity, position);
             }
-        }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+        }
     }
 }

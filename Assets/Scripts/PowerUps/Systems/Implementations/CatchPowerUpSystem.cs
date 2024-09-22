@@ -1,44 +1,52 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class CatchPowerUpSystem : SystemBase
+public partial struct CatchPowerUpSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
-        
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
-        
-        RequireForUpdate<PowerUpReceivedEvent>();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        Entities
-            .ForEach((Entity paddle, in PaddleData paddleData, in PowerUpReceivedEvent request, 
-                in DynamicBuffer<BallLink> ballsBuffer) =>
+        new BreakPowerUpJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged),
+            BallStuckToPaddleLookup = SystemAPI.GetComponentLookup<BallStuckToPaddle>()
+        }.Schedule();
+    }
+    
+    [BurstCompile]
+    public partial struct BreakPowerUpJob : IJobEntity
+    {
+        public EntityCommandBuffer Ecb;
+        [ReadOnly] public ComponentLookup<BallStuckToPaddle> BallStuckToPaddleLookup;
+        
+        private void Execute(Entity paddle, in PaddleData paddleData, in PowerUpReceivedEvent request, 
+            in DynamicBuffer<BallLink> ballsBuffer)
+        {
+            if (paddleData.ExclusivePowerUp == request.Type)
+                return;
+
+            if (paddleData.ExclusivePowerUp == PowerUpType.Catch && PowerUpsHelper.IsExclusivePowerUp(request.Type))
             {
-                if (paddleData.ExclusivePowerUp == request.Type)
-                    return;
-
-                if (paddleData.ExclusivePowerUp == PowerUpType.Catch && PowerUpsHelper.IsExclusivePowerUp(request.Type))
-                {
-                    ecb.RemoveComponent<StickPaddleTag>(paddle);
+                Ecb.RemoveComponent<StickPaddleTag>(paddle);
                     
-                    foreach (var ball in ballsBuffer.Reinterpret<Entity>()) {
-                        if (SystemAPI.HasComponent<BallStuckToPaddle>(ball))
-                            ecb.RemoveComponent<BallStuckToPaddle>(ball);
-                    }
+                foreach (var ball in ballsBuffer.Reinterpret<Entity>()) {
+                    if (BallStuckToPaddleLookup.HasComponent(ball))
+                        Ecb.RemoveComponent<BallStuckToPaddle>(ball);
                 }
+            }
 
-                if (request.Type == PowerUpType.Catch)
-                    ecb.AddComponent(paddle, new StickPaddleTag());
-            }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+            if (request.Type == PowerUpType.Catch)
+                Ecb.AddComponent(paddle, new StickPaddleTag());
+        }
     }
 }

@@ -1,29 +1,37 @@
-﻿using Unity.Collections;
+﻿using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(PowerUpsSystemGroup))]
-public partial class PowerUpLossCheckSystem : SystemBase
+public partial struct PowerUpLossCheckSystem : ISystem
 {
-    private EndSimulationEntityCommandBufferSystem _endSimulationEcbSystem;
-    
-    protected override void OnCreate()
+    [BurstCompile]
+    public void OnCreate(ref SystemState state)
     {
-        base.OnCreate();
+        state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+    }
+
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
         
-        _endSimulationEcbSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+        new PowerUpLossCheckJob
+        {
+            Ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged)
+        }.Schedule();
     }
     
-    protected override void OnUpdate()
+    [BurstCompile]
+    [WithAll(typeof(PowerUpData))]
+    public partial struct PowerUpLossCheckJob : IJobEntity
     {
-        var ecb = _endSimulationEcbSystem.CreateCommandBuffer();
-
-        Entities.WithAll<PowerUpData>().ForEach((Entity entity, in LocalTransform transform) =>
+        public EntityCommandBuffer Ecb;
+        
+        private void Execute(Entity entity, in LocalTransform transform)
         {
             if (transform.Position.y <= 0)
-                ecb.DestroyEntity(entity);
-        }).Schedule();
-        
-        _endSimulationEcbSystem.AddJobHandleForProducer(Dependency);
+                Ecb.DestroyEntity(entity);
+        }
     }
 }

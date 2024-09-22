@@ -1,19 +1,19 @@
-﻿using Unity.Entities;
+﻿using Unity.Burst;
+using Unity.Entities;
 
 [UpdateInGroup(typeof(GameInputSystemGroup))]
-public partial class PaddleAIInputSystem : SystemBase
+public partial struct PaddleAIInputSystem : ISystem
 {
-    protected override void OnUpdate()
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
     {
-        Entities
-            .WithoutBurst()
-            .ForEach((ref PaddleInputData inputData, in PlayerIndex playerIndex) =>
+        foreach (var (inputData, playerIndex) in SystemAPI.Query<RefRW<PaddleInputData>, RefRO<PlayerIndex>>())
+        {
+            if (playerIndex.ValueRO.Value > 1)
             {
-                if (playerIndex.Value > 1)
-                {
-                    var state = (int) World.Time.ElapsedTime % (2 + playerIndex.Value);
-                    inputData.Movement += state == 0 ? 1 : -1;
-                }
-            }).Run();
+                var side = (int) SystemAPI.Time.ElapsedTime % (2 + playerIndex.ValueRO.Value);
+                inputData.ValueRW.Movement += side == 0 ? 1 : -1;
+            }
+        }
     }
 }

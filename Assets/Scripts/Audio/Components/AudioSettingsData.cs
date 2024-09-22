@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
@@ -25,5 +26,5 @@ public struct AudioClipEntry
 
 public class AudioSettingsData : IComponentData
 {
-    public AudioClipEntry[] Clips;
+    public Dictionary<AudioClipKeys, AudioClip> Clips;
 }

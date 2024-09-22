@@ -2,9 +2,9 @@
 
 # DOTS Arkanoid
 
-It's a clone of the classic arcade game created with the experimental Unity DOTS technologies. The game is based on the original Arkanoid gameplay. And the visual style refers to the games of the 16-bit era.
+It's a clone of the classic arcade game created with the Unity DOTS technologies. The game is based on the original Arkanoid gameplay. And the visual style refers to the games of the 16-bit era.
 
-The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows to write code in a data oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS (DOTS Physics and Hybrid Renderer). Some technical details are described below.
+The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows to write code in a data oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS. Some technical details are described below.
 
 ![scr1](/Images/1s.png) ![scr2](/Images/2s.png)
 ![scr3](/Images/3s.png) ![scr4](/Images/4s.png)
@@ -20,17 +20,17 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 
 ## Tech details
 
-* Pure ECS in runtime, except Audio, UI and resources, where [managed components](https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/components-managed.html) are used.
-* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@1.0/manual/index.html) with shader for UV coord. animation.
+* I tried to avoid excessive sync points in the simulation code. Burst compilation and jobs scheduling is used for most jobs.
+* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@1.3/manual/index.html) with shader for UV coord. animation.
 * [DOTS Physics](https://docs.unity3d.com/Packages/com.unity.physics@latest/index.html) for triggers (ICollisionEventsJob), queries (CastCollider) and masks filtering
-* Burst compilation and jobs scheduling is used for most jobs, however, some sync points optimizations are possible.
 * You can use "F1" cheat button to spawn multiple balls.
+* To enable Benchmark mode, make BenchmarkLevelsSettings active and deactivate LevelsSettings in the scene. This mode simulates 1 thousand or more balls and 20 thousand blocks.
 
 ## Links
 
-* [Getting started with Unity DOTS](https://nikolayk.medium.com/getting-started-with-unity-dots-part-1-ecs-7f963777db8e)
 * [Systems Interaction in Entity-Component-System (Events)](https://medium.com/@ben.rasooli/systems-interaction-in-entity-component-system-events-4a050153c8ac)
 * [Unity DOTS forum](https://forum.unity.com/forums/data-oriented-technology-stack.147/)
+* [Introduction to the DOTS for advanced Unity developers](https://unity.com/resources/introduction-to-dots-ebook)
 * [Arkanoid StrategyWiki](https://strategywiki.org/wiki/Arkanoid/Gameplay)
 
 ## Third party resources

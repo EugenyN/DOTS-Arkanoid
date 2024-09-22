@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,48 +21,53 @@ public class GamePanelUI : MonoBehaviour
     [SerializeField] private PlayerPanelUI[] _playerPanelUis;
     [SerializeField] private Text _roundLabelText;
     [SerializeField] private Text _creditsLabelText;
-
-    private GameSystem _gameSystem;
-    private PaddleInputPollSystem _paddleInputPollSystem;
-
+    
     private float? _messageTime;
-    private readonly bool[] _gameOver = new bool[GameConst.MaxPlayers];
+    private readonly HashSet<int> _gameOverPlayers = new HashSet<int>();
 
     private void OnEnable()
     {
         if (World.DefaultGameObjectInjectionWorld == null)
             return;
-        _gameSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<GameSystem>();
-        _paddleInputPollSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<PaddleInputPollSystem>();
 
         _messageTime = null;
 
-        for (int i = 0; i < GameConst.MaxPlayers; i++)
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        GameUtils.TryGetSingleton<LevelsSettings>(entityManager, out var levelsSettings);
+        
+        for (int i = 0; i < levelsSettings.MaxPlayers; i++)
         {
             SetGameOverMessage(i, false);
             SetPlayerScore(i, 0);
             SetPlayerLives(i, 3);
         }
+        
     }
     
     public void OnExitButtonClick()
     {
-        _gameSystem.ExitGame();
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        GameSystem.ExitGame(entityManager);
     }
 
     public void OnPauseButtonClick()
     {
-        _gameSystem.SetPause(!_gameSystem.IsGamePaused());
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        GameSystem.SetPause(entityManager, !GameSystem.IsGamePaused());
     }
 
     public void OnFireButtonClick()
     {
-        _paddleInputPollSystem.DoInputAction(0, InputActionType.Fire);
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        PaddleInputPollSystem.DoInputAction(entityManager, 0, InputActionType.Fire);
     }
 
     public void SetPlayersCount(int playersCount)
     {
-        for (int i = 0; i < GameConst.MaxPlayers; i++)
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        GameUtils.TryGetSingleton<LevelsSettings>(entityManager, out var levelsSettings);
+        
+        for (int i = 0; i < levelsSettings.MaxPlayers; i++)
             _playerPanelUis[i].PanelObject.SetActive(i < playersCount);
 
         if (playersCount > 2)
@@ -96,8 +102,10 @@ public class GamePanelUI : MonoBehaviour
     
     public void SetGameOverMessage(int playerIndex, bool gameOver)
     {
-        _gameOver[playerIndex] = gameOver;
-        _playerPanelUis[playerIndex].GameOverText.gameObject.SetActive(gameOver);
+        if (gameOver)
+            _gameOverPlayers.Add(playerIndex);
+        else
+            _gameOverPlayers.Remove(playerIndex);
     }
     
     public void SetGameAreaMessage(string message, float? time = null)
@@ -123,11 +131,8 @@ public class GamePanelUI : MonoBehaviour
                 ClearGameAreaMessages();
             }
         }
-
-        for (int i = 0; i < GameConst.MaxPlayers; i++)
-        {
-            if (_gameOver[i])
-                _playerPanelUis[i].GameOverText.gameObject.SetActive(Time.time % 2 > 1);
-        }
+        
+        foreach (var playerIndex in _gameOverPlayers)
+            _playerPanelUis[playerIndex].GameOverText.gameObject.SetActive(Time.time % 2 > 1);
     }
 }
