@@ -1,17 +1,18 @@
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(GameStateSystemGroup))]
 partial struct GameSystem : ISystem, ISystemStartStop
 {
-    [BurstCompile]
     public void OnCreate(ref SystemState state)
     {
         state.RequireForUpdate<GameSettings>();
+
+        bool vSyncEnabled = PlayerPrefs.GetInt("vSyncEnabled", 1) == 1;
+        ApplyGraphicsSettings(vSyncEnabled);
     }
     
-    [BurstCompile]
     public void OnStartRunning(ref SystemState state)
     {
         var gameSettings = SystemAPI.GetSingleton<GameSettings>();
@@ -27,12 +28,15 @@ partial struct GameSystem : ISystem, ISystemStartStop
         {
             CurrentState = ComponentType.ReadWrite<MainMenuState>()
         });
+        
+        var inputSettings = SystemAPI.ManagedAPI.GetSingleton<InputSettings>();
+        inputSettings.MouseSensitivity = PlayerPrefs.GetFloat("mouseSensitivity", 0.5f);
     }
 
     public void OnStopRunning(ref SystemState state)
     {
     }
-
+    
     public static void StartGame(EntityManager entityManager, int playersCount)
     {
         GameUtils.TryGetSingleton<GameSettings>(entityManager, out var gameSettings);
@@ -58,12 +62,23 @@ partial struct GameSystem : ISystem, ISystemStartStop
 
     public static void SetPause(EntityManager entityManager, bool pause)
     {
-        UnityEngine.Time.timeScale = pause ? 0 : 1;
+        Time.timeScale = pause ? 0 : 1;
         entityManager.AddSingleFrameComponent(new GamePausedEvent { Paused = pause });
     }
 
     public static bool IsGamePaused()
     {
-        return UnityEngine.Time.timeScale == 0;
+        return Time.timeScale == 0;
+    }
+    
+    public static void ApplyGraphicsSettings(bool vSync)
+    {
+        QualitySettings.vSyncCount = vSync ? 1 : 0;
+        
+#if UNITY_ANDROID && !UNITY_EDITOR
+            // these platforms cap FPS at 30 by default, so we need to unlock it.
+            // https://stackoverflow.com/questions/47031279/unity-mobile-device-30fps-locked
+            Application.targetFrameRate = (int)System.Math.Round(Screen.currentResolution.refreshRateRatio.value);
+#endif
     }
 }

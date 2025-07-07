@@ -14,4 +14,5 @@ public struct InputNames
 public class InputSettings : IComponentData
 {
     public InputNames[] InputNames;
+    public float MouseSensitivity;
 }

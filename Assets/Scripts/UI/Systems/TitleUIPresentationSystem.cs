@@ -14,11 +14,6 @@ public partial struct TitleUIPresentationSystem : ISystem
         var titleUI = state.EntityManager.GetComponentObject<TitleUI>(titleUIEntity);
         
         foreach (var command in SystemAPI.Query<ChangeStateCommand>())
-        {
-            if (command.TargetState == typeof(MainMenuState))
-                titleUI.gameObject.SetActive(true);
-            else if (command.TargetState == typeof(GameProcessState))
-                titleUI.gameObject.SetActive(false);
-        }
+            titleUI.gameObject.SetActive(command.TargetState == typeof(MainMenuState));
     }
 }

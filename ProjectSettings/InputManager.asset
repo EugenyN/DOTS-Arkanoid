@@ -532,7 +532,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 1	
+    joyNum: 1
   - serializedVersion: 3
     m_Name: P2_Action
     descriptiveName: 
@@ -548,7 +548,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2	
+    joyNum: 2
   - serializedVersion: 3
     m_Name: P2_Move
     descriptiveName: 
@@ -612,7 +612,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2	
+    joyNum: 2
   - serializedVersion: 3
     m_Name: P3_Action
     descriptiveName: 
@@ -628,7 +628,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2	
+    joyNum: 2
   - serializedVersion: 3
     m_Name: P3_Move
     descriptiveName: 
@@ -692,7 +692,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2	
+    joyNum: 2
   - serializedVersion: 3
     m_Name: P4_Action
     descriptiveName: 
@@ -708,7 +708,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2	
+    joyNum: 2
   - serializedVersion: 3
     m_Name: P4_Move
     descriptiveName: 
@@ -772,7 +772,7 @@ InputManager:
     invert: 0
     type: 0
     axis: 0
-    joyNum: 2		
+    joyNum: 2
   - serializedVersion: 3
     m_Name: Debug Vertical
     descriptiveName: 
@@ -837,3 +837,4 @@ InputManager:
     type: 0
     axis: 0
     joyNum: 0
+  m_UsePhysicalKeys: 1

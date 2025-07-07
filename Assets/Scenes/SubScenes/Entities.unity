@@ -42,7 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -165,18 +166,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb7fa9300a244e59a9edb1c8520f6c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BallEntityPrefab: {fileID: 6887475011426345520, guid: aef2492d465fac2428fb8143660f65e5,
-    type: 3}
-  BlockEntityPrefab: {fileID: 5479178889855886559, guid: b07f95f1070d4444591246059b25d9d6,
-    type: 3}
-  PaddleEntityPrefab: {fileID: 1314940309337419778, guid: 12afeaf2bb15d604ab614517d7cfa828,
-    type: 3}
-  PowerUpEntityPrefab: {fileID: 5479178889855886559, guid: d44d7918665bb7d48a0a300e89070876,
-    type: 3}
-  LevelEntityPrefab: {fileID: 8958138811530292719, guid: e217fb74179ec4e44b7e2baf6c1fcbc2,
-    type: 3}
-  LaserEntityPrefab: {fileID: 6887475011426345520, guid: e8fcf142aaf79ad4c9e611d26fe5b419,
-    type: 3}
+  BallEntityPrefab: {fileID: 6887475011426345520, guid: aef2492d465fac2428fb8143660f65e5, type: 3}
+  BlockEntityPrefab: {fileID: 5479178889855886559, guid: b07f95f1070d4444591246059b25d9d6, type: 3}
+  PaddleEntityPrefab: {fileID: 1314940309337419778, guid: 12afeaf2bb15d604ab614517d7cfa828, type: 3}
+  PowerUpEntityPrefab: {fileID: 5479178889855886559, guid: d44d7918665bb7d48a0a300e89070876, type: 3}
+  LevelEntityPrefab: {fileID: 8958138811530292719, guid: e217fb74179ec4e44b7e2baf6c1fcbc2, type: 3}
+  LaserEntityPrefab: {fileID: 6887475011426345520, guid: e8fcf142aaf79ad4c9e611d26fe5b419, type: 3}
 --- !u!114 &24759188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -290,8 +285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 300e4f50c4f946d18c54b84c9bcc0641, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NormalPaddleMaterial: {fileID: 2100000, guid: 1ea5af18329b9ce4dbcf9b0609f7d74e,
-    type: 2}
+  NormalPaddleMaterial: {fileID: 2100000, guid: 1ea5af18329b9ce4dbcf9b0609f7d74e, type: 2}
   BigPaddleMaterial: {fileID: 2100000, guid: fe0ae9d741561f643974440f50d74788, type: 2}
 --- !u!1 &346995278
 GameObject:
@@ -327,10 +321,14 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_SubstepCount: 1
   m_SolverIterationCount: 4
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
+  m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 1
+  m_IncrementalDynamicBroadphase: 0
+  m_IncrementalStaticBroadphase: 0
 --- !u!4 &346995281
 Transform:
   m_ObjectHideFlags: 0
@@ -409,7 +407,7 @@ MonoBehaviour:
     x: 6
     y: 1
     z: 1
-  PaddleSpeed: 25
+  PaddleSpeed: 40
 --- !u!1 &1440958083
 GameObject:
   m_ObjectHideFlags: 0
@@ -443,8 +441,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 300e4f50c4f946d18c54b84c9bcc0641, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NormalPaddleMaterial: {fileID: 2100000, guid: 1ea5af18329b9ce4dbcf9b0609f7d74e,
-    type: 2}
+  NormalPaddleMaterial: {fileID: 2100000, guid: 1ea5af18329b9ce4dbcf9b0609f7d74e, type: 2}
   BigPaddleMaterial: {fileID: 2100000, guid: fe0ae9d741561f643974440f50d74788, type: 2}
 --- !u!114 &1440958085
 MonoBehaviour:
@@ -555,18 +552,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb7fa9300a244e59a9edb1c8520f6c0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BallEntityPrefab: {fileID: 6887475011426345520, guid: aef2492d465fac2428fb8143660f65e5,
-    type: 3}
-  BlockEntityPrefab: {fileID: 5479178889855886559, guid: b07f95f1070d4444591246059b25d9d6,
-    type: 3}
-  PaddleEntityPrefab: {fileID: 1314940309337419778, guid: 12afeaf2bb15d604ab614517d7cfa828,
-    type: 3}
-  PowerUpEntityPrefab: {fileID: 5479178889855886559, guid: d44d7918665bb7d48a0a300e89070876,
-    type: 3}
-  LevelEntityPrefab: {fileID: 8958138811530292719, guid: cbc7dbf12c80c98489fff7d8b292dcc9,
-    type: 3}
-  LaserEntityPrefab: {fileID: 6887475011426345520, guid: e8fcf142aaf79ad4c9e611d26fe5b419,
-    type: 3}
+  BallEntityPrefab: {fileID: 6887475011426345520, guid: aef2492d465fac2428fb8143660f65e5, type: 3}
+  BlockEntityPrefab: {fileID: 5479178889855886559, guid: b07f95f1070d4444591246059b25d9d6, type: 3}
+  PaddleEntityPrefab: {fileID: 1314940309337419778, guid: 12afeaf2bb15d604ab614517d7cfa828, type: 3}
+  PowerUpEntityPrefab: {fileID: 5479178889855886559, guid: d44d7918665bb7d48a0a300e89070876, type: 3}
+  LevelEntityPrefab: {fileID: 8958138811530292719, guid: cbc7dbf12c80c98489fff7d8b292dcc9, type: 3}
+  LaserEntityPrefab: {fileID: 6887475011426345520, guid: e8fcf142aaf79ad4c9e611d26fe5b419, type: 3}
 --- !u!4 &1440958088
 Transform:
   m_ObjectHideFlags: 0

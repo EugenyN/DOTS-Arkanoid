@@ -6,6 +6,7 @@ public class TitleUI : MonoBehaviour
 {
     [SerializeField] GameObject _onePlayerButton;
     [SerializeField] GameObject _twoPlayerButton;
+    [SerializeField] GameObject _optionsButton;
     
     private void OnEnable()
     {
@@ -32,6 +33,12 @@ public class TitleUI : MonoBehaviour
                     GameSystem.StartGame(entityManager, 2);
             }
         }
+        
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+                Application.Quit();
+        }
     }
 
     public void OnOnePlayerButtonClick()
@@ -44,6 +51,12 @@ public class TitleUI : MonoBehaviour
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         GameSystem.StartGame(entityManager, 2);
+    }
+
+    public void OnOptionsButtonClick()
+    {
+        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        entityManager.AddSingleFrameComponent(ChangeStateCommand.Create<OptionsMenuState>());
     }
     
     public void OnFourPlayerDemoButtonClick()

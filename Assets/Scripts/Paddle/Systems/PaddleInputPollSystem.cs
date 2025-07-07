@@ -18,11 +18,19 @@ public partial struct PaddleInputPollSystem : ISystem
         foreach (var (inputData, playerIndex) in SystemAPI.Query<RefRW<PaddleInputData>, RefRO<PlayerIndex>>())
         {
             var inputNames = inputSettings.InputNames[playerIndex.ValueRO.Value];
-                    
+
+            if (Input.GetButtonDown(inputNames.Pause))
+                inputData.ValueRW.Action = InputActionType.Pause;
+
+            if (GameSystem.IsGamePaused()) 
+                continue;
+            
 #if UNITY_STANDALONE
             if (playerIndex.ValueRO.Value == 0)
             {
-                inputData.ValueRW.Movement += Input.GetAxis(inputNames.MouseMove);
+                // make mouse move input frame independent dividing by Time.deltaTime
+                inputData.ValueRW.Movement += Input.GetAxis(inputNames.MouseMove)
+                    / Time.deltaTime / 100;
                 if (Input.GetButtonDown(inputNames.MouseAction) && !IsPointerOverGameObject())
                     inputData.ValueRW.Action = InputActionType.Fire;
             }
@@ -34,13 +42,12 @@ public partial struct PaddleInputPollSystem : ISystem
                 }
 #endif
             inputData.ValueRW.Movement += Input.GetAxis(inputNames.Move);
-                
-            if (Input.GetButtonDown(inputNames.Pause))
-                inputData.ValueRW.Action = InputActionType.Pause;
-                
+
+            inputData.ValueRW.Movement *= 0.5f + inputSettings.MouseSensitivity;
+            
             if (Input.GetButtonDown(inputNames.Action))
                 inputData.ValueRW.Action = InputActionType.Fire;
-                
+
             if (Input.GetKeyDown(KeyCode.F1))
                 inputData.ValueRW.Action = InputActionType.SpawnBallCheat;
         }

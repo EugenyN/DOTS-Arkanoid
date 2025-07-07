@@ -41,7 +41,6 @@ public class GamePanelUI : MonoBehaviour
             SetPlayerScore(i, 0);
             SetPlayerLives(i, 3);
         }
-        
     }
     
     public void OnExitButtonClick()
@@ -58,17 +57,23 @@ public class GamePanelUI : MonoBehaviour
 
     public void OnFireButtonClick()
     {
-        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        PaddleInputPollSystem.DoInputAction(entityManager, 0, InputActionType.Fire);
+        if (!GameSystem.IsGamePaused())
+        {
+            var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
+            PaddleInputPollSystem.DoInputAction(entityManager, 0, InputActionType.Fire);
+        }
     }
 
     public void SetPlayersCount(int playersCount)
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         GameUtils.TryGetSingleton<LevelsSettings>(entityManager, out var levelsSettings);
-        
+
         for (int i = 0; i < levelsSettings.MaxPlayers; i++)
+        {
             _playerPanelUis[i].PanelObject.SetActive(i < playersCount);
+            _playerPanelUis[i].GameOverText.gameObject.SetActive(false);
+        }
 
         if (playersCount > 2)
         {
