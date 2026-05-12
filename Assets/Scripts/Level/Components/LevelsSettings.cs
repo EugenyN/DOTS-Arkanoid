@@ -12,7 +12,9 @@ public struct BlockColorCode
 [Serializable]
 public struct LevelsData
 {
+    [NonSerialized]
     public BlobArray<BlobArray<Color32>> LevelsBlockData;
+    [NonSerialized]
     public BlobArray<BlockColorCode> BlocksPalette;
 }
 

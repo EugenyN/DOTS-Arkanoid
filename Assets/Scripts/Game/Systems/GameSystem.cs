@@ -29,8 +29,7 @@ partial struct GameSystem : ISystem, ISystemStartStop
             CurrentState = ComponentType.ReadWrite<MainMenuState>()
         });
         
-        var inputSettings = SystemAPI.ManagedAPI.GetSingleton<InputSettings>();
-        inputSettings.MouseSensitivity = PlayerPrefs.GetFloat("mouseSensitivity", 0.5f);
+        gameSettings.InputSensitivity = PlayerPrefs.GetFloat("inputSensitivity", 0.5f);
     }
 
     public void OnStopRunning(ref SystemState state)
@@ -65,6 +64,12 @@ partial struct GameSystem : ISystem, ISystemStartStop
         Time.timeScale = pause ? 0 : 1;
         entityManager.AddSingleFrameComponent(new GamePausedEvent { Paused = pause });
     }
+    
+    public static void SetPause(EntityCommandBuffer ecb, bool pause)
+    {
+        Time.timeScale = pause ? 0 : 1;
+        ecb.AddSingleFrameComponent(new GamePausedEvent { Paused = pause });
+    }
 
     public static bool IsGamePaused()
     {
@@ -75,7 +80,7 @@ partial struct GameSystem : ISystem, ISystemStartStop
     {
         QualitySettings.vSyncCount = vSync ? 1 : 0;
         
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
             // these platforms cap FPS at 30 by default, so we need to unlock it.
             // https://stackoverflow.com/questions/47031279/unity-mobile-device-30fps-locked
             Application.targetFrameRate = (int)System.Math.Round(Screen.currentResolution.refreshRateRatio.value);

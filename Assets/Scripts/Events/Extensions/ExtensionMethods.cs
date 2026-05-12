@@ -6,7 +6,9 @@ public static class ExtensionMethods
         where T : unmanaged, IComponentData
     {
         var entity = ecb.CreateEntity();
+#if DEBUG
         ecb.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
+#endif
 
         ecb.AddComponent(entity, component);
         ecb.AddComponent<SingleFrameEntityTag>(entity);
@@ -16,7 +18,9 @@ public static class ExtensionMethods
         where T : unmanaged, IComponentData
     {
         var entity = em.CreateEntity();
+#if DEBUG
         em.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
+#endif
 
         em.AddComponentData(entity, component);
         em.AddComponent<SingleFrameEntityTag>(entity);
@@ -25,7 +29,9 @@ public static class ExtensionMethods
     public static void AddSingleFrameComponent<T>(this EntityCommandBuffer ecb) where T : unmanaged, IComponentData
     {
         var entity = ecb.CreateEntity();
+#if DEBUG
         ecb.SetName(entity, $"Event<{ComponentType.ReadOnly<T>()}>");
+#endif
 
         ecb.AddComponent<T>(entity);
         ecb.AddComponent<SingleFrameEntityTag>(entity);

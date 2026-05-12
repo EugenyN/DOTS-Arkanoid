@@ -1055,7 +1055,7 @@ GameObject:
   m_Component:
   - component: {fileID: 266272942}
   - component: {fileID: 266272941}
-  - component: {fileID: 266272940}
+  - component: {fileID: 266272943}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -1063,26 +1063,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &266272940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266272939}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &266272941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1113,6 +1093,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &266272943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266272939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.UI.InputSystemUIInputModule
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_PointAction: {fileID: -1654692200621890270, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_MoveAction: {fileID: -8784545083839296357, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_SubmitAction: {fileID: 392368643174621059, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_CancelAction: {fileID: 7727032971491509709, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_LeftClickAction: {fileID: 3001919216989983466, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_MiddleClickAction: {fileID: -2185481485913320682, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_RightClickAction: {fileID: -4090225696740746782, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: 0afe7179ac7e50546bd09f26038f94dc, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1 &292068682
 GameObject:
   m_ObjectHideFlags: 0
@@ -1321,6 +1332,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1534,7 +1546,7 @@ GameObject:
   - component: {fileID: 431221417}
   - component: {fileID: 431221418}
   m_Layer: 5
-  m_Name: MouseSensitivitySlider
+  m_Name: InputSensitivitySlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1575,7 +1587,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 2
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -1586,7 +1598,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -2823,7 +2835,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: EugenyN 2022
+  m_Text: EugenyN 2022-2026
 --- !u!222 &861542403
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2883,7 +2895,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 2
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -2894,7 +2906,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_SelectedColor: {r: 0.63342315, g: 0.63342315, b: 0.63342315, a: 1}
     m_DisabledColor: {r: 0.36927217, g: 0.36180708, b: 0.36180708, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -3207,7 +3219,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -3215,6 +3226,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3427,8 +3439,8 @@ RectTransform:
   m_Children:
   - {fileID: 292068683}
   - {fileID: 2040337114}
-  - {fileID: 1026622491}
   - {fileID: 1833177427}
+  - {fileID: 1026622491}
   m_Father: {fileID: 318570154}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -4196,7 +4208,7 @@ GameObject:
   - component: {fileID: 1327712732}
   - component: {fileID: 1327712731}
   m_Layer: 5
-  m_Name: MouseSensitivityLabel
+  m_Name: InputSensitivityLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4254,7 +4266,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'MOUSE SENSITIVITY:'
+  m_Text: 'INPUT SENSITIVITY:'
 --- !u!222 &1327712732
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4395,7 +4407,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 2
-    m_WrapAround: 1
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -4405,7 +4417,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0.49411765}
     m_HighlightedColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 0}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.21176471}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.46666667}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.70980394}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0
@@ -4700,7 +4712,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ver.04
+  m_Text: ver.05
 --- !u!222 &1433665923
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5330,7 +5342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 2
-    m_WrapAround: 1
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -5340,7 +5352,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0.49411765}
     m_HighlightedColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 0}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.21176471}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.46666667}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.70980394}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0
@@ -6229,7 +6241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 2
-    m_WrapAround: 1
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -6239,7 +6251,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0.49411765}
     m_HighlightedColor: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 0}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.21176471}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.46666667}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.70980394}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0
@@ -7114,7 +7126,7 @@ MonoBehaviour:
   _vsyncToggle: {fileID: 924094477}
   _vsyncToggleText: {fileID: 65303340}
   _backButton: {fileID: 1507112542}
-  _mouseSensSlider: {fileID: 431221418}
+  _inputSensSlider: {fileID: 431221418}
 --- !u!1 &1952336331
 GameObject:
   m_ObjectHideFlags: 0
@@ -7435,7 +7447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 2
-    m_WrapAround: 1
+    m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -7445,7 +7457,7 @@ MonoBehaviour:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 0.49411765}
     m_HighlightedColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 0}
     m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.21176471}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.46666667}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.70980394}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0

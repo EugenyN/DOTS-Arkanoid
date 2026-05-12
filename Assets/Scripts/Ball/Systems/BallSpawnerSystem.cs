@@ -62,8 +62,6 @@ public partial struct BallSpawnerSystem : ISystem
             Ecb.AddComponent(ball, new TextureAnimationData { FrameIndex = playerIndex.Value });
 
             Ecb.AppendToBuffer(spawnRequest.OwnerPaddle, new BallLink { Ball = ball });
-
-            Ecb.AddComponent(ball, new MaterialTextureSTData());
             
             Ecb.AddBuffer<BallHitEvent>(ball);
         }

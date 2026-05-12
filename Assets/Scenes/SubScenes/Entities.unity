@@ -321,14 +321,24 @@ MonoBehaviour:
     x: -0
     y: -9.81
     z: -0
+  m_EnableGyroscopicTorque: 0
   m_SubstepCount: 1
   m_SolverIterationCount: 4
+  m_DirectSolverSettings:
+    m_ContactStiffness: 100000
+    m_ContactDamping: 500
+    m_ContactSlip: 0.001
+    m_MaximumJointStiffness: 100000
+    m_MaximumJointDamping: 10000
+    m_MinimumMotorSlip: 0.0001
   m_EnableSolverStabilizationHeuristic: 0
   m_MultiThreaded: 1
   m_CollisionTolerance: 0.01
   m_SynchronizeCollisionWorld: 1
   m_IncrementalDynamicBroadphase: 0
   m_IncrementalStaticBroadphase: 0
+  m_MaxDynamicDepenetrationVelocity: 3
+  m_MaxStaticDepenetrationVelocity: Infinity
 --- !u!4 &346995281
 Transform:
   m_ObjectHideFlags: 0
@@ -585,71 +595,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78be1838c27448ae91b6e80780e1eab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1463950999
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1463951002}
-  - component: {fileID: 1463951000}
-  m_Layer: 0
-  m_Name: InputSettings
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1463951000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1463950999}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6746a1290afd4e3db80c85500fc6a346, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  InputNames:
-  - MouseMove: P1_MouseMove
-    MouseAction: P1_MouseAction
-    Move: P1_Move
-    Pause: P1_Pause
-    Action: P1_Action
-  - MouseMove: P2_MouseMove
-    MouseAction: P2_MouseAction
-    Move: P2_Move
-    Pause: P2_Pause
-    Action: P2_Action
-  - MouseMove: P3_MouseMove
-    MouseAction: P3_MouseAction
-    Move: P3_Move
-    Pause: P3_Pause
-    Action: P3_Action
-  - MouseMove: P4_MouseMove
-    MouseAction: P4_MouseAction
-    Move: P4_Move
-    Pause: P4_Pause
-    Action: P4_Action
---- !u!4 &1463951002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1463950999}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2017516427
 GameObject:
   m_ObjectHideFlags: 0
@@ -788,4 +733,3 @@ SceneRoots:
   - {fileID: 24759185}
   - {fileID: 1440958088}
   - {fileID: 2017516429}
-  - {fileID: 1463951002}

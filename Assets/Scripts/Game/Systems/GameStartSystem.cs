@@ -25,7 +25,7 @@ public partial struct GameStartSystem : ISystem, ISystemStartStop
         var levelsSettings = SystemAPI.GetSingleton<LevelsSettings>();
 	    
         var cameraPos = new float3(levelsSettings.GameAreaWidth / 2.0f, levelsSettings.GameAreaHeight / 2.0f, -5);
-        var camera = Object.FindFirstObjectByType<SceneCamera>();
+        var camera = Object.FindAnyObjectByType<SceneCamera>();
         camera.Setup(cameraPos, levelsSettings.GameAreaHeight / 2.0f);
 
         var ecb = new EntityCommandBuffer(Allocator.TempJob);

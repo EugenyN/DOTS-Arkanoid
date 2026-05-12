@@ -1,5 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class OptionsUI : MonoBehaviour
@@ -7,15 +9,15 @@ public class OptionsUI : MonoBehaviour
     [SerializeField] Toggle _vsyncToggle;
     [SerializeField] Text _vsyncToggleText;
     [SerializeField] GameObject _backButton;
-    [SerializeField] Slider _mouseSensSlider;
+    [SerializeField] Slider _inputSensSlider;
 
     private void Start()
     {
         _vsyncToggle.onValueChanged.AddListener(OnToggleValueChanged);
-        _mouseSensSlider.onValueChanged.AddListener(OnMouseSensitivitySliderValueChanged);
+        _inputSensSlider.onValueChanged.AddListener(OnInputSensitivitySliderValueChanged);
         
-        float mouseSensitivity = PlayerPrefs.GetFloat("mouseSensitivity", 0.5f);
-        _mouseSensSlider.value = mouseSensitivity;
+        float mouseSensitivity = PlayerPrefs.GetFloat("inputSensitivity", 0.5f);
+        _inputSensSlider.value = mouseSensitivity;
         
         bool vSyncEnabled = PlayerPrefs.GetInt("vSyncEnabled", 1) == 1;
         _vsyncToggle.isOn = vSyncEnabled;
@@ -26,21 +28,26 @@ public class OptionsUI : MonoBehaviour
         _vsyncToggleText.text = "UNAVAILABLE";
 #endif
     }
+    
+    private void OnEnable()
+    {
+        EventSystem.current.SetSelectedGameObject(_vsyncToggle.gameObject);
+    }
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.Escape))
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
             OnBackButtonClick();
     }
 
-    private void OnMouseSensitivitySliderValueChanged(float value)
+    private void OnInputSensitivitySliderValueChanged(float value)
     {
         var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        GameUtils.TryGetSingletonManaged<InputSettings>(entityManager, out var inputSettings);
+        GameUtils.TryGetSingletonRW<GameSettings>(entityManager, out var gameSettings);
 
-        inputSettings.MouseSensitivity = value;
+        gameSettings.ValueRW.InputSensitivity = value;
         
-        PlayerPrefs.SetFloat("mouseSensitivity", value);
+        PlayerPrefs.SetFloat("inputSensitivity", value);
     }
 
     private void OnToggleValueChanged(bool isOn)

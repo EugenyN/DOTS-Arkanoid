@@ -12,8 +12,8 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Game design details
 
 * Original game mechanics and retro look inspired by [Arkanoid](https://en.wikipedia.org/wiki/Arkanoid) arcade game and SNES Arkanoid: Doh It Again 1997 by Taito. Local coop mode inspired by Block Block (World 910910) arcade game by Capcom.
-* For input you can use touch screen, keyboard (A, D, Left, Right, Space), a mouse (only player 1) and gamepads (Xbox Controller/XInput)
-* Catch, Enlarge, Laser, Disruption and other power-ups have implemented, hi score and balls speedup mechanics have implemented as well.
+* For input you can use touch screen, keyboard (A, D, Left, Right, Space, Enter), a mouse (only player 1) and gamepads (Xbox Controller/XInput)
+* Catch, Enlarge, Laser, Disruption and other power-ups are implemented; hi-score and ball speedup mechanics are implemented as well.
 * 5 original stages are included, arcade version of field size 13x18 is used.
 * The ball movement and bouncing physics is close to the original Arkanoid physics.
 * Press Alt+Enter to switch between full screen and windowed mode (for desktop builds).
@@ -21,10 +21,15 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Tech details
 
 * I tried to avoid excessive sync points in the simulation code. Burst compilation and jobs scheduling is used for most jobs.
-* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@1.3/manual/index.html) with shader for UV coord. animation.
+* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@6.5/manual/index.html) with shader for UV coord. animation.
 * [DOTS Physics](https://docs.unity3d.com/Packages/com.unity.physics@latest/index.html) for triggers (ICollisionEventsJob), queries (CastCollider) and masks filtering
 * You can use "F1" cheat button to spawn multiple balls.
 * To enable Benchmark mode, make BenchmarkLevelsSettings active and deactivate LevelsSettings in the scene. This mode simulates 1 thousand or more balls and 20 thousand blocks.
+
+## How to run
+
+* Open the project in Unity, load `Assets/Scenes/Arkanoid.unity` and enter Play mode.
+* To remove the "Display 1 no cameras rendering" message in Unity, uncheck "Warn if no cameras rendering" by right-clicking the three vertical dots (or the tab itself) in the top-right corner of the Game view.
 
 ## Links
 
@@ -43,9 +48,11 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 
 ## Download
 
-You can download DOTS Arkanoid packages for Android and Windows in [Release page](https://github.com/EugenyN/DOTS-Arkanoid/releases).
+You can download DOTS Arkanoid packages for Android and Windows on the [Releases page](https://github.com/EugenyN/DOTS-Arkanoid/releases).
 
 
 ## License
 
-Copyright (c) 2022 Eugeny Novikov. The source code is under the MIT license.
+Copyright (c) 2022-2026 Eugeny Novikov. The source code is under the MIT license. See [LICENSE](LICENSE).
+
+Third-party resources listed above are not covered by the MIT license and remain under their respective owners' licenses and copyrights.

@@ -17,4 +17,5 @@ public struct GameSettings : IComponentData
     public float3 PaddleSize;
     public float3 BigPaddleSize;
     public float PaddleSpeed;
+    public float InputSensitivity;
 }

@@ -39,7 +39,8 @@ public class GameSettingsAuthoring : MonoBehaviour
                 DisruptionPowerUpBallsCount = authoring.DisruptionPowerUpBallsCount,
                 PaddleSize = authoring.PaddleSize,
                 BigPaddleSize = authoring.BigPaddleSize,
-                PaddleSpeed = authoring.PaddleSpeed
+                PaddleSpeed = authoring.PaddleSpeed,
+                InputSensitivity = 0.5f
             });
         }
     }

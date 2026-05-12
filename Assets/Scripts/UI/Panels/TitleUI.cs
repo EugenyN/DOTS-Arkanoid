@@ -1,6 +1,7 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class TitleUI : MonoBehaviour
 {
@@ -15,28 +16,9 @@ public class TitleUI : MonoBehaviour
 
     private void Update()
     {
-        if (World.DefaultGameObjectInjectionWorld == null)
-            return;
-        
-        var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-        GameUtils.TryGetSingleton<LevelsSettings>(entityManager, out var levelsSettings);
-        GameUtils.TryGetSingletonManaged<InputSettings>(entityManager, out var inputSettings);
-
-        for (int i = 0; i < levelsSettings.MaxPlayers; i++)
-        {
-            if (Input.GetButtonDown(inputSettings.InputNames[i].Action) || 
-                Input.GetButtonDown(inputSettings.InputNames[i].Pause))
-            {
-                if (EventSystem.current.currentSelectedGameObject == _onePlayerButton)
-                    GameSystem.StartGame(entityManager, 1);
-                if (EventSystem.current.currentSelectedGameObject == _twoPlayerButton)
-                    GameSystem.StartGame(entityManager, 2);
-            }
-        }
-        
         if (Application.platform == RuntimePlatform.Android)
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Keyboard.current.escapeKey.wasPressedThisFrame)
                 Application.Quit();
         }
     }

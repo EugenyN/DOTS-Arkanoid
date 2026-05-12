@@ -25,7 +25,8 @@ public partial struct BallCollisionResolvingSystem : ISystem
         {
             ColliderCastHits = colliderCastHits,
             World = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld,
-            LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(true),
+            DeltaTime = SystemAPI.Time.DeltaTime,
+            LocalTransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(),
             PaddleDataLookup = SystemAPI.GetComponentLookup<PaddleData>(true),
             WallTagLookup = SystemAPI.GetComponentLookup<WallTag>(true),
             BlockDataLookup = SystemAPI.GetComponentLookup<BlockData>(true),
@@ -42,9 +43,11 @@ public partial struct BallCollisionResolvingSystem : ISystem
     public partial struct BallCollisionResolvingJob : IJobEntity
     {
         public NativeList<ColliderCastHit> ColliderCastHits;
+        public float DeltaTime;
+        
+        public ComponentLookup<LocalTransform> LocalTransformLookup;
         
         [ReadOnly] public CollisionWorld World;
-        [ReadOnly] public ComponentLookup<LocalTransform> LocalTransformLookup;
         [ReadOnly] public ComponentLookup<PaddleData> PaddleDataLookup;
         [ReadOnly] public ComponentLookup<WallTag> WallTagLookup;
         [ReadOnly] public ComponentLookup<BlockData> BlockDataLookup;
@@ -53,15 +56,18 @@ public partial struct BallCollisionResolvingSystem : ISystem
         
         public ComponentLookup<HitByBallEvent> HitByBallEventLookup;
 
-        private void Execute(Entity ball, ref PhysicsVelocity velocity, in LocalTransform transform,
-            in PhysicsCollider collider, ref DynamicBuffer<BallHitEvent> ballHitEvents)
+        private void Execute(Entity ball, ref PhysicsVelocity velocity, in PhysicsCollider collider,
+            ref DynamicBuffer<BallHitEvent> ballHitEvents)
         {
             ColliderCastHits.Clear();
 
+            var transform = LocalTransformLookup[ball];
+            
             unsafe
             {
                 var colliderCastInput = new ColliderCastInput {
-                    Collider = collider.ColliderPtr, Start = transform.Position, End = transform.Position
+                    Collider = collider.ColliderPtr, 
+                    Start = transform.Position - velocity.Linear * DeltaTime, End = transform.Position
                 };
 
                 World.CastCollider(colliderCastInput, ref ColliderCastHits);
@@ -69,7 +75,7 @@ public partial struct BallCollisionResolvingSystem : ISystem
 
             if (ColliderCastHits.IsCreated && ColliderCastHits.Length != 0)
             {
-                float distToHitEntity = float.MaxValue;
+                float closestHitFraction = float.MaxValue;
                 ColliderCastHit closestHit = default;
 
                 for (int i = 0; i < ColliderCastHits.Length; i++)
@@ -81,24 +87,25 @@ public partial struct BallCollisionResolvingSystem : ISystem
                     
                     ballHitEvents.Add(new BallHitEvent { HitEntity = hit.Entity });
 
-                    var hitEntityTransform = LocalTransformLookup[hit.Entity];
-                    var dist = math.distancesq(hitEntityTransform.Position, transform.Position);
-                    if (dist < distToHitEntity)
+                    if (hit.Fraction < closestHitFraction)
                     {
-                        distToHitEntity = dist;
+                        closestHitFraction = hit.Fraction;
                         closestHit = hit;
                     }
                 }
-
+                
                 if (PaddleDataLookup.HasComponent(closestHit.Entity))
                 {
                     var paddleData = PaddleDataLookup[closestHit.Entity];
                     var hitTransform = LocalTransformLookup[closestHit.Entity];
-                    ResolvePaddleCollision(ref velocity, transform.Position, hitTransform.Position, paddleData.Size);
+                    
+                    if (ResolvePaddleCollision(ref velocity, ref transform, hitTransform.Position, paddleData.Size))
+                        LocalTransformLookup[ball] = transform;
                 }
                 else if (WallTagLookup.HasComponent(closestHit.Entity))
                 {
-                    ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
+                    ResolveBallCollision(ref velocity, ref transform, closestHit, DeltaTime);
+                    LocalTransformLookup[ball] = transform;
                 }
                 else if (BlockDataLookup.HasComponent(closestHit.Entity))
                 {
@@ -108,30 +115,41 @@ public partial struct BallCollisionResolvingSystem : ISystem
                     }
                     else
                     {
-                        ResolveBallCollision(ref velocity, closestHit.SurfaceNormal);
+                        ResolveBallCollision(ref velocity, ref transform, closestHit, DeltaTime);
+                        LocalTransformLookup[ball] = transform;
                     }
                 }
             }
         }
     }
 
-    private static bool ResolvePaddleCollision(ref PhysicsVelocity ballVelocity, float3 ballPosition,
+    private static bool ResolvePaddleCollision(ref PhysicsVelocity ballVelocity, ref LocalTransform ballTransform, 
         float3 paddlePosition, float3 paddleSize)
     {
         if (ballVelocity.Linear.y > 0)
             return false;
 
+        var ballPosition = ballTransform.Position;
         if (ballPosition.y < paddlePosition.y - paddleSize.y / 2.0f)
             return false;
 
         var direction = BallsHelper.GetBounceDirection(ballPosition, paddlePosition, paddleSize);
         ballVelocity.Linear = direction * math.length(ballVelocity.Linear);
+        
+        var minY = paddlePosition.y + paddleSize.y / 2f + 0.05f;
+        ballTransform.Position.y = math.max(ballTransform.Position.y, minY);
+        
         return true;
     }
 
-    private static void ResolveBallCollision(ref PhysicsVelocity ballVelocity, float3 normal)
+    private static void ResolveBallCollision(ref PhysicsVelocity ballVelocity, ref LocalTransform ballTransform, 
+        in ColliderCastHit closestHit, float deltaTime)
     {
-        var sign = math.sign(normal);
+        var castStart = ballTransform.Position - ballVelocity.Linear * deltaTime;
+        var castEnd = ballTransform.Position;
+        ballTransform.Position = math.lerp(castStart, castEnd, closestHit.Fraction) + closestHit.SurfaceNormal * 0.01f;
+        
+        var sign = math.sign(closestHit.SurfaceNormal);
 
         if (sign.x != 0)
             ballVelocity.Linear.x = sign.x * math.abs(ballVelocity.Linear.x);
