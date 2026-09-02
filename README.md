@@ -21,7 +21,7 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Tech details
 
 * I tried to avoid excessive sync points in the simulation code. Burst compilation and jobs scheduling is used for most jobs.
-* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@6.5/manual/index.html) with shader for UV coord. animation.
+* URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@6.6/manual/index.html) with shader for UV coord. animation.
 * [DOTS Physics](https://docs.unity3d.com/Packages/com.unity.physics@latest/index.html) for triggers (ICollisionEventsJob), queries (CastCollider) and masks filtering
 * You can use "F1" cheat button to spawn multiple balls.
 * To enable Benchmark mode, make BenchmarkLevelsSettings active and deactivate LevelsSettings in the scene. This mode simulates 1 thousand or more balls and 20 thousand blocks.
@@ -34,7 +34,7 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Links
 
 * [Systems Interaction in Entity-Component-System (Events)](https://medium.com/@ben.rasooli/systems-interaction-in-entity-component-system-events-4a050153c8ac)
-* [Unity DOTS forum](https://forum.unity.com/forums/data-oriented-technology-stack.147/)
+* [Unity DOTS forum](https://discussions.unity.com/c/entity-component-system/)
 * [Introduction to the DOTS for advanced Unity developers](https://unity.com/resources/introduction-to-dots-ebook)
 * [Arkanoid StrategyWiki](https://strategywiki.org/wiki/Arkanoid/Gameplay)
 

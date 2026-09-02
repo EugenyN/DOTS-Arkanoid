@@ -130,7 +130,6 @@ GameObject:
   - component: {fileID: 24759185}
   - component: {fileID: 24759187}
   - component: {fileID: 24759189}
-  - component: {fileID: 24759188}
   - component: {fileID: 24759190}
   m_Layer: 0
   m_Name: LevelsSettings
@@ -172,39 +171,6 @@ MonoBehaviour:
   PowerUpEntityPrefab: {fileID: 5479178889855886559, guid: d44d7918665bb7d48a0a300e89070876, type: 3}
   LevelEntityPrefab: {fileID: 8958138811530292719, guid: e217fb74179ec4e44b7e2baf6c1fcbc2, type: 3}
   LaserEntityPrefab: {fileID: 6887475011426345520, guid: e8fcf142aaf79ad4c9e611d26fe5b419, type: 3}
---- !u!114 &24759188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24759183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7f22c27fa704af3b613d40bdd2cd662, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Clips:
-  - Key: 0
-    Clip: {fileID: 8300000, guid: 46a24d8f5a114584e93df0069a3f4d01, type: 3}
-  - Key: 1
-    Clip: {fileID: 8300000, guid: ab062d96160b4c949ab5b9c865eba000, type: 3}
-  - Key: 2
-    Clip: {fileID: 8300000, guid: ade463afecda69a4b9922cb973a0c448, type: 3}
-  - Key: 3
-    Clip: {fileID: 8300000, guid: 007b6fa14ff72ef438846468ca547f60, type: 3}
-  - Key: 4
-    Clip: {fileID: 8300000, guid: 551b4b594f8d00b43bbece9a12d892f1, type: 3}
-  - Key: 5
-    Clip: {fileID: 8300000, guid: 86b6340d61b72404eaf21880df097999, type: 3}
-  - Key: 7
-    Clip: {fileID: 8300000, guid: 5514510a6625e6d458a887a86f2370b6, type: 3}
-  - Key: 8
-    Clip: {fileID: 8300000, guid: 4075dfe979ca3174491b530408004b7f, type: 3}
-  - Key: 9
-    Clip: {fileID: 8300000, guid: 2d5560c3df19cbf4ebf93ce0841f4ba8, type: 3}
-  - Key: 6
-    Clip: {fileID: 8300000, guid: 1d171b78fb1f2fc4ca5767cc68c2c551, type: 3}
 --- !u!114 &24759189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -429,7 +395,6 @@ GameObject:
   - component: {fileID: 1440958088}
   - component: {fileID: 1440958087}
   - component: {fileID: 1440958086}
-  - component: {fileID: 1440958085}
   - component: {fileID: 1440958084}
   - component: {fileID: 1440958089}
   m_Layer: 0
@@ -453,39 +418,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NormalPaddleMaterial: {fileID: 2100000, guid: 1ea5af18329b9ce4dbcf9b0609f7d74e, type: 2}
   BigPaddleMaterial: {fileID: 2100000, guid: fe0ae9d741561f643974440f50d74788, type: 2}
---- !u!114 &1440958085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1440958083}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7f22c27fa704af3b613d40bdd2cd662, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Clips:
-  - Key: 0
-    Clip: {fileID: 8300000, guid: 46a24d8f5a114584e93df0069a3f4d01, type: 3}
-  - Key: 1
-    Clip: {fileID: 8300000, guid: ab062d96160b4c949ab5b9c865eba000, type: 3}
-  - Key: 2
-    Clip: {fileID: 8300000, guid: ade463afecda69a4b9922cb973a0c448, type: 3}
-  - Key: 3
-    Clip: {fileID: 8300000, guid: 007b6fa14ff72ef438846468ca547f60, type: 3}
-  - Key: 4
-    Clip: {fileID: 8300000, guid: 551b4b594f8d00b43bbece9a12d892f1, type: 3}
-  - Key: 5
-    Clip: {fileID: 8300000, guid: 86b6340d61b72404eaf21880df097999, type: 3}
-  - Key: 7
-    Clip: {fileID: 8300000, guid: 5514510a6625e6d458a887a86f2370b6, type: 3}
-  - Key: 8
-    Clip: {fileID: 8300000, guid: 4075dfe979ca3174491b530408004b7f, type: 3}
-  - Key: 9
-    Clip: {fileID: 8300000, guid: 2d5560c3df19cbf4ebf93ce0841f4ba8, type: 3}
-  - Key: 6
-    Clip: {fileID: 8300000, guid: 1d171b78fb1f2fc4ca5767cc68c2c551, type: 3}
 --- !u!114 &1440958086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,6 +527,101 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78be1838c27448ae91b6e80780e1eab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1885910604
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1885910605}
+  - component: {fileID: 1885910606}
+  m_Layer: 0
+  m_Name: AudioSettings
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1885910605
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1885910604}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1885910606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1885910604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7f22c27fa704af3b613d40bdd2cd662, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioSettingsDataAuthoring
+  Clips:
+  - Key: 0
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663585
+  - Key: 1
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663586
+  - Key: 2
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663587
+  - Key: 3
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663588
+  - Key: 4
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663589
+  - Key: 5
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663590
+  - Key: 6
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663594
+  - Key: 7
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663591
+  - Key: 8
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663592
+  - Key: 9
+    Clip:
+      Id:
+        entityId:
+          m_rawData: 1099511663593
 --- !u!1 &2017516427
 GameObject:
   m_ObjectHideFlags: 0
@@ -605,6 +632,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2017516429}
   - component: {fileID: 2017516428}
+  - component: {fileID: 2017516430}
   m_Layer: 0
   m_Name: AudioSource
   m_TagString: Untagged
@@ -623,8 +651,8 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_Resource: {fileID: 8300000, guid: 4075dfe979ca3174491b530408004b7f, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -724,12 +752,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2017516430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2017516427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a320b6de3e553dd4cb69b17e75d17c07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioSourceRefAuthoring
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 884970856}
   - {fileID: 346995281}
+  - {fileID: 1885910605}
   - {fileID: 24759185}
   - {fileID: 1440958088}
   - {fileID: 2017516429}

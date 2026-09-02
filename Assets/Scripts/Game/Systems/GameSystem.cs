@@ -86,4 +86,23 @@ partial struct GameSystem : ISystem, ISystemStartStop
             Application.targetFrameRate = (int)System.Math.Round(Screen.currentResolution.refreshRateRatio.value);
 #endif
     }
+
+    private static int lastWidth = 1280;
+    private static int lastHeight = 720;
+    
+    public static void SetFullScreen(bool isOn)
+    {
+        if (isOn)
+        {
+            lastWidth = Screen.width;
+            lastHeight = Screen.height;
+            Screen.SetResolution(Screen.currentResolution.width, Screen.currentResolution.height, true);
+        }
+        else
+        {
+            Screen.SetResolution(lastWidth, lastHeight, false);
+        }
+        
+        Screen.fullScreen = isOn;
+    }
 }

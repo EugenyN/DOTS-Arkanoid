@@ -1,8 +1,8 @@
 using Unity.Entities;
 using UnityEngine;
 
-public class PaddleMaterialsConfig : IComponentData
+public struct PaddleMaterialsConfig : IComponentData
 {
-    public Material NormalPaddleMaterial;
-    public Material BigPaddleMaterial;
+    public UnityObjectRef<Material> NormalPaddleMaterial;
+    public UnityObjectRef<Material> BigPaddleMaterial;
 }

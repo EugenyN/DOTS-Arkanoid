@@ -35,7 +35,7 @@ public partial struct BallCollisionResolvingSystem : ISystem
             HitByBallEventLookup = SystemAPI.GetComponentLookup<HitByBallEvent>()
         }.Schedule(state.Dependency);
 
-        colliderCastHits.Dispose(state.Dependency);
+        state.Dependency = colliderCastHits.Dispose(state.Dependency);
     }
 
     [BurstCompile]

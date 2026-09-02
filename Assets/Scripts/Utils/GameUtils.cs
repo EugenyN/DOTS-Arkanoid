@@ -16,20 +16,6 @@ public static class GameUtils
         singletonEntity = default;
         return false;
     }
-    
-    public static bool TryGetSingletonEntityManaged<T>(EntityManager entityManager, out Entity singletonEntity)
-        where T : class
-    {
-        var singletonQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<T>().Build(entityManager);
-        if (singletonQuery.HasSingleton<T>())
-        {
-            singletonEntity = singletonQuery.GetSingletonEntity();
-            return true;
-        }
-
-        singletonEntity = default;
-        return false;
-    }
 
     public static bool TryGetSingleton<T>(EntityManager entityManager, out T singleton)
         where T : unmanaged, IComponentData
@@ -56,20 +42,6 @@ public static class GameUtils
         }
 
         singletonRW = default;
-        return false;
-    }
-    
-    public static bool TryGetSingletonManaged<T>(EntityManager entityManager, out T singleton)
-        where T : class
-    {
-        var singletonQuery = new EntityQueryBuilder(Allocator.Temp).WithAll<T>().Build(entityManager);
-        if (singletonQuery.HasSingleton<T>())
-        {
-            singleton = singletonQuery.GetSingleton<T>();
-            return true;
-        }
-
-        singleton = default;
         return false;
     }
 }

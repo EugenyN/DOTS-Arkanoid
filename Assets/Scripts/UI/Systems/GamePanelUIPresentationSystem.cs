@@ -1,68 +1,70 @@
 ﻿using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial struct GamePanelUIPresentationSystem : ISystem
+public partial class GamePanelUIPresentationSystem : SystemBase
 {
-    public void OnCreate(ref SystemState state)
+    private GamePanelUI _gamePanelUI;
+
+    protected override void OnCreate()
     {
-        state.RequireForUpdate<GamePanelUI>();
-        state.RequireForUpdate<GameData>();
+        RequireForUpdate<GameData>();
     }
 
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
-        GameUtils.TryGetSingletonEntityManaged<GamePanelUI>(state.EntityManager, out var gamePanelUI);
-        var inGameUI = state.EntityManager.GetComponentObject<GamePanelUI>(gamePanelUI);
+        if (_gamePanelUI == null)
+            _gamePanelUI = Object.FindAnyObjectByType<GamePanelUI>(FindObjectsInactive.Include);
 
         var gameData = SystemAPI.GetSingleton<GameData>();
-        
+
         foreach (var command in SystemAPI.Query<ChangeStateCommand>())
         {
             if (command.TargetState == typeof(MainMenuState))
             {
-                inGameUI.gameObject.SetActive(false);
+                _gamePanelUI.gameObject.SetActive(false);
             }
             else if (command.TargetState == typeof(GameStartState))
             {
-                inGameUI.gameObject.SetActive(true);
-                    
-                inGameUI.SetPlayersCount(gameData.PlayersCount);
-                inGameUI.SetLevel(gameData.Level);
-                inGameUI.SetHighScore(gameData.HighScore);
-                inGameUI.SetGameAreaMessage($"ROUND {gameData.Level:D2}\n\nREADY!", 3.0f);
+                _gamePanelUI.gameObject.SetActive(true);
+
+                _gamePanelUI.SetPlayersCount(gameData.PlayersCount);
+                _gamePanelUI.SetLevel(gameData.Level);
+                _gamePanelUI.SetHighScore(gameData.HighScore);
+                _gamePanelUI.SetGameAreaMessage($"ROUND {gameData.Level:D2}\n\nREADY!", 3.0f);
             }
             else if (command.TargetState == typeof(GameWinState))
             {
-                inGameUI.SetGameAreaMessage(" YOU WIN !");
+                _gamePanelUI.SetGameAreaMessage(" YOU WIN !");
             }
             else if (command.TargetState == typeof(GameOverState))
             {
-                inGameUI.SetGameAreaMessage("GAME OVER");
+                _gamePanelUI.SetGameAreaMessage("GAME OVER");
             }
         }
-        
+
         foreach (var gamePausedEvent in SystemAPI.Query<GamePausedEvent>())
         {
             if (gamePausedEvent.Paused)
-                inGameUI.SetGameAreaMessage("PAUSED");
+                _gamePanelUI.SetGameAreaMessage("PAUSED");
             else
-                inGameUI.ClearGameAreaMessages();
+                _gamePanelUI.ClearGameAreaMessages();
         }
-        
+
         foreach (var hiScoreEvent in SystemAPI.Query<HiScoreUpdatedEvent>())
         {
-            inGameUI.SetHighScore(hiScoreEvent.Score);
-            inGameUI.SetGameAreaMessage($"GAME OVER\n\nNEW HIGH SCORE !\n{hiScoreEvent.Score}");
+            _gamePanelUI.SetHighScore(hiScoreEvent.Score);
+            _gamePanelUI.SetGameAreaMessage($"GAME OVER\n\nNEW HIGH SCORE !\n{hiScoreEvent.Score}");
         }
-        
-        foreach (var (playerData, playerIndex) in 
+
+        foreach (var (playerData, playerIndex) in
                  SystemAPI.Query<PlayerData, PlayerIndex>().WithChangeFilter<PlayerData>())
         {
-            inGameUI.SetPlayerLives(playerIndex.Value, playerData.Lives);
-            inGameUI.SetPlayerScore(playerIndex.Value, playerData.Score);
-                
+            _gamePanelUI.SetPlayerLives(playerIndex.Value, playerData.Lives);
+            _gamePanelUI.SetPlayerScore(playerIndex.Value, playerData.Score);
+
             if (playerData.Lives == 0)
-                inGameUI.SetGameOverMessage(playerIndex.Value, true);
+                _gamePanelUI.SetGameOverMessage(playerIndex.Value, true);
         }
     }
 }

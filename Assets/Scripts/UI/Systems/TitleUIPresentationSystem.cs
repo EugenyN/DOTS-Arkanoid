@@ -1,19 +1,17 @@
 using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial struct TitleUIPresentationSystem : ISystem
+public partial class TitleUIPresentationSystem : SystemBase
 {
-    public void OnCreate(ref SystemState state)
-    {
-        state.RequireForUpdate<TitleUI>();
-    }
+    private TitleUI _titleUI;
 
-    public void OnUpdate(ref SystemState state)
+    protected override void OnUpdate()
     {
-        GameUtils.TryGetSingletonEntityManaged<TitleUI>(state.EntityManager, out var titleUIEntity);
-        var titleUI = state.EntityManager.GetComponentObject<TitleUI>(titleUIEntity);
-        
+        if (_titleUI == null)
+            _titleUI = Object.FindAnyObjectByType<TitleUI>(FindObjectsInactive.Include);
+
         foreach (var command in SystemAPI.Query<ChangeStateCommand>())
-            titleUI.gameObject.SetActive(command.TargetState == typeof(MainMenuState));
+            _titleUI.gameObject.SetActive(command.TargetState == typeof(MainMenuState));
     }
 }

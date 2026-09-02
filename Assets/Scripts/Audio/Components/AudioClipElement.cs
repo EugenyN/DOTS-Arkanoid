@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
@@ -18,13 +17,8 @@ public enum AudioClipKeys
 }
 
 [Serializable]
-public struct AudioClipEntry
+public struct AudioClipElement : IBufferElementData
 {
     public AudioClipKeys Key;
-    public AudioClip Clip;
-}
-
-public class AudioSettingsData : IComponentData
-{
-    public Dictionary<AudioClipKeys, AudioClip> Clips;
+    public UnityObjectRef<AudioClip> Clip;
 }

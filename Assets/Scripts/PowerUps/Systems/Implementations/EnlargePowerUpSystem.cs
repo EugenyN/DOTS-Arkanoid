@@ -48,12 +48,12 @@ public partial struct EnlargePowerUpSystem : ISystem, ISystemStartStop
         
         var hybridRendererSystem = state.World.GetExistingSystemManaged<EntitiesGraphicsSystem>();
         
-        var materialsConfig = SystemAPI.ManagedAPI.GetSingleton<PaddleMaterialsConfig>();
-        
+        var materialsConfig = SystemAPI.GetSingleton<PaddleMaterialsConfig>();
+
         if (_normalPaddleMaterial == BatchMaterialID.Null)
-            _normalPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.NormalPaddleMaterial);
+            _normalPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.NormalPaddleMaterial.Value);
         if (_bigPaddleMaterial == BatchMaterialID.Null)
-            _bigPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.BigPaddleMaterial);
+            _bigPaddleMaterial = hybridRendererSystem.RegisterMaterial(materialsConfig.BigPaddleMaterial.Value);
     }
     
     public void OnStopRunning(ref SystemState state)

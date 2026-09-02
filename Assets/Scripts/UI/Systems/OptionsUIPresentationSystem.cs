@@ -1,19 +1,17 @@
 ﻿using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
-public partial struct OptionsUIPresentationSystem : ISystem
+public partial class OptionsUIPresentationSystem : SystemBase
 {
-    public void OnCreate(ref SystemState state)
+    private OptionsUI _optionsUI;
+    
+    protected override void OnUpdate()
     {
-        state.RequireForUpdate<OptionsUI>();
-    }
+        if (_optionsUI == null)
+            _optionsUI = Object.FindAnyObjectByType<OptionsUI>(FindObjectsInactive.Include);
 
-    public void OnUpdate(ref SystemState state)
-    {
-        GameUtils.TryGetSingletonEntityManaged<OptionsUI>(state.EntityManager, out var optionsUIEntity);
-        var optionsUI = state.EntityManager.GetComponentObject<OptionsUI>(optionsUIEntity);
-        
         foreach (var command in SystemAPI.Query<ChangeStateCommand>())
-            optionsUI.gameObject.SetActive(command.TargetState == typeof(OptionsMenuState));
+            _optionsUI.gameObject.SetActive(command.TargetState == typeof(OptionsMenuState));
     }
 }
