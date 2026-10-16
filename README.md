@@ -2,12 +2,18 @@
 
 # DOTS Arkanoid
 
-It's a clone of the classic arcade game created with the Unity DOTS technologies. The game is based on the original Arkanoid gameplay. And the visual style refers to the games of the 16-bit era.
+It's a clone of the classic arcade game created with Unity DOTS technologies. The game is based on the original Arkanoid gameplay. The visual style refers to the games of the 16-bit era.
 
-The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows to write code in a data oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS. Some technical details are described below.
+The goal of this project is to get to know Unity DOTS better. DOTS (Data-Oriented Technology Stack) is a set of technologies developed by Unity for building high-performance, multithreaded code. The most important part of DOTS is the ECS component system, which allows you to write code in a data-oriented way. The DOTS Arkanoid project uses physics and rendering built on ECS. Some technical details are described below.
 
-![scr1](/Images/1s.png) ![scr2](/Images/2s.png)
-![scr3](/Images/3s.png) ![scr4](/Images/4s.png)
+<p align="center">
+  <img src="Images/1.png" width="45%" alt="Screenshot 1">&nbsp;&nbsp;
+  <img src="Images/2.png" width="45%" alt="Screenshot 2">
+</p>
+<p align="center">
+  <img src="Images/3.png" width="45%" alt="Screenshot 3">&nbsp;&nbsp;
+  <img src="Images/4.png" width="45%" alt="Screenshot 4">
+</p>
 
 ## Game design details
 
@@ -20,7 +26,7 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 
 ## Tech details
 
-* I tried to avoid excessive sync points in the simulation code. Burst compilation and jobs scheduling is used for most jobs.
+* I tried to avoid excessive sync points in the simulation code. Burst compilation and job scheduling is used for most jobs.
 * URP + [Entities Graphics](https://docs.unity3d.com/Packages/com.unity.entities.graphics@6.6/manual/index.html) with shader for UV coord. animation.
 * [DOTS Physics](https://docs.unity3d.com/Packages/com.unity.physics@latest/index.html) for triggers (ICollisionEventsJob), queries (CastCollider) and masks filtering
 * You can use "F1" cheat button to spawn multiple balls.
@@ -41,14 +47,14 @@ The goal of this project is to get to know Unity DOTS better. The DOTS (Data-Ori
 ## Third party resources
 
 * "Press Start 2P" font, designed by CodeMan38 (OFL)
-* Title logo "Wonder Boy/Sega" by http://arcade.photonstorm.com/
+* Title logo "Wonder Boy/Sega" by [Arcade Font Writer](https://arcade.photonstorm.com/)
 * Sprites from Arkanoid: Doh it Again 1997 SNES/Taito
 * Sound effects from Arkanoid II NES/Taito
 * Original Arkanoid gameplay by Taito Corporation
 
 ## Download
 
-You can download DOTS Arkanoid packages for Android and Windows on the [Releases page](https://github.com/EugenyN/DOTS-Arkanoid/releases).
+You can download DOTS Arkanoid packages for Android and Windows on the [Releases page](../../releases).
 
 
 ## License

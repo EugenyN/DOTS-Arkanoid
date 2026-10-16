@@ -37,4 +37,9 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
-\.idea/
+# Rider
+.idea/
+
+#
+/Assets/SceneDependencyCache/
+/Assets/SceneDependencyCache.meta

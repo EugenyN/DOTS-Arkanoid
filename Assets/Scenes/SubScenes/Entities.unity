@@ -572,56 +572,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioSettingsDataAuthoring
   Clips:
-  - Key: 0
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663585
-  - Key: 1
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663586
-  - Key: 2
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663587
-  - Key: 3
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663588
-  - Key: 4
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663589
-  - Key: 5
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663590
-  - Key: 6
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663594
-  - Key: 7
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663591
-  - Key: 8
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663592
-  - Key: 9
-    Clip:
-      Id:
-        entityId:
-          m_rawData: 1099511663593
+  - key: 2
+    value: {fileID: 8300000, guid: ade463afecda69a4b9922cb973a0c448, type: 3}
+  - key: 1
+    value: {fileID: 8300000, guid: ab062d96160b4c949ab5b9c865eba000, type: 3}
+  - key: 9
+    value: {fileID: 8300000, guid: 2d5560c3df19cbf4ebf93ce0841f4ba8, type: 3}
+  - key: 3
+    value: {fileID: 8300000, guid: 007b6fa14ff72ef438846468ca547f60, type: 3}
+  - key: 4
+    value: {fileID: 8300000, guid: 551b4b594f8d00b43bbece9a12d892f1, type: 3}
+  - key: 5
+    value: {fileID: 8300000, guid: 86b6340d61b72404eaf21880df097999, type: 3}
+  - key: 6
+    value: {fileID: 8300000, guid: 1d171b78fb1f2fc4ca5767cc68c2c551, type: 3}
+  - key: 7
+    value: {fileID: 8300000, guid: 5514510a6625e6d458a887a86f2370b6, type: 3}
+  - key: 8
+    value: {fileID: 8300000, guid: 4075dfe979ca3174491b530408004b7f, type: 3}
+  - key: 0
+    value: {fileID: 8300000, guid: 46a24d8f5a114584e93df0069a3f4d01, type: 3}
 --- !u!1 &2017516427
 GameObject:
   m_ObjectHideFlags: 0
@@ -632,7 +602,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2017516429}
   - component: {fileID: 2017516428}
-  - component: {fileID: 2017516430}
   m_Layer: 0
   m_Name: AudioSource
   m_TagString: Untagged
@@ -651,7 +620,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 4075dfe979ca3174491b530408004b7f, type: 3}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -752,18 +721,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2017516430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2017516427}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a320b6de3e553dd4cb69b17e75d17c07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AudioSourceRefAuthoring
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

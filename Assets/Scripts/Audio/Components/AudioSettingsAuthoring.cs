@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 
 public class AudioSettingsAuthoring : MonoBehaviour
 {
-    public AudioClipElement[] Clips;
+    [SerializeField]
+    public Dictionary<AudioClipKeys, AudioClip> Clips = new();
 
     public class Baker : Baker<AudioSettingsAuthoring>
     {
@@ -12,11 +14,8 @@ public class AudioSettingsAuthoring : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.None);
             var buffer = AddBuffer<AudioClipElement>(entity);
 
-            if (authoring.Clips == null)
-                return;
-
             foreach (var entry in authoring.Clips)
-                buffer.Add(entry);
+                buffer.Add(new AudioClipElement { Key = entry.Key, Clip = entry.Value });
         }
     }
 }
