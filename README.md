@@ -40,7 +40,7 @@ The goal of this project is to get to know Unity DOTS better. DOTS (Data-Oriente
 ## Links
 
 * [Systems Interaction in Entity-Component-System (Events)](https://medium.com/@ben.rasooli/systems-interaction-in-entity-component-system-events-4a050153c8ac)
-* [Unity DOTS forum](https://discussions.unity.com/c/entity-component-system/)
+* [Unity DOTS forum](https://forum.unity.com/forums/data-oriented-technology-stack.147/)
 * [Introduction to the DOTS for advanced Unity developers](https://unity.com/resources/introduction-to-dots-ebook)
 * [Arkanoid StrategyWiki](https://strategywiki.org/wiki/Arkanoid/Gameplay)
 
